@@ -1,0 +1,6 @@
+{
+    "s3-bucket": "<bucket-name>",
+    "profile": "<aws-cli-profile>",
+    "stack-name": "<cloudformation-stack-name>",
+    "code-archive-name": "<archive-name>"
+}

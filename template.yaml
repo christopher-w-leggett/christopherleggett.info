@@ -11,33 +11,6 @@ Parameters:
         Description: The domain name for the website
         Type: String
 
-Mappings:
-  RegionMap:
-    us-east-1:
-      S3hostedzoneID: Z3AQBSTGFYJSTF
-      websiteendpoint: s3-website-us-east-1.amazonaws.com
-    us-west-1:
-      S3hostedzoneID: Z2F56UZL2M1ACD
-      websiteendpoint: s3-website-us-west-1.amazonaws.com
-    us-west-2:
-      S3hostedzoneID: Z3BJ6K6RIION7M
-      websiteendpoint: s3-website-us-west-2.amazonaws.com
-    eu-west-1:
-      S3hostedzoneID: Z1BKCTXD74EZPE
-      websiteendpoint: s3-website-eu-west-1.amazonaws.com
-    ap-southeast-1:
-      S3hostedzoneID: Z3O0J2DXBE1FTB
-      websiteendpoint: s3-website-ap-southeast-1.amazonaws.com
-    ap-southeast-2:
-      S3hostedzoneID: Z1WCIGYICN2BYD
-      websiteendpoint: s3-website-ap-southeast-2.amazonaws.com
-    ap-northeast-1:
-      S3hostedzoneID: Z2M4EHUR26P7ZW
-      websiteendpoint: s3-website-ap-northeast-1.amazonaws.com
-    sa-east-1:
-      S3hostedzoneID: Z31GFT0UA1I2HV
-      websiteendpoint: s3-website-sa-east-1.amazonaws.com
-
 Resources:
     CDNAccessIdentity:
         Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
@@ -49,10 +22,11 @@ Resources:
         Properties:
             DistributionConfig:
                 Aliases:
+                    - !Ref RootDomainName
                     - !Sub
                         - www.${Domain}
                         - Domain: !Ref RootDomainName
-#TODO: CustomErrorResponses section
+                #TODO: CustomErrorResponses section
                 Origins:
                     - DomainName: !Sub
                           - ${Domain}.s3.amazonaws.com
@@ -79,20 +53,51 @@ Resources:
                         QueryString: 'false'
                         Cookies:
                             Forward: none
-                    ViewerProtocolPolicy: allow-all
-                    #ViewerProtocolPolicy: redirect-to-https
+                    ViewerProtocolPolicy: redirect-to-https
+                    LambdaFunctionAssociations:
+                        - EventType: viewer-request
+                          LambdaFunctionARN: !Ref RedirectLambdaVersion9
                 PriceClass: PriceClass_100
                 Restrictions:
                     GeoRestriction:
                         RestrictionType: whitelist
                         Locations:
                           - US
-#TODO: Get certificate in place for https over custom domain
+                #TODO: Get certificate in place for https over custom domain
                 ViewerCertificate:
                     CloudFrontDefaultCertificate: 'true'
                     #ACMCertificateArn: ...
                     MinimumProtocolVersion: TLSv1.1_2016
                     #SSLSupportMethod: sni-only
+    #TODO: Attempt to speed up deploys by having cloudfront distro reference lambda alias.
+    RedirectLambda:
+        Type: AWS::Lambda::Function
+        Properties:
+            Description: >
+                Edge Lambda performing domain redirects.
+            Code: temp/build/christopherleggett.info.zip
+            Handler: edge/redirects/index.handler
+            MemorySize: 128
+            Role: !GetAtt RedirectLambdaExecutionRole.Arn
+            Runtime: nodejs8.10
+    RedirectLambdaVersion9:
+        Type: AWS::Lambda::Version
+        Properties:
+            FunctionName: !Ref RedirectLambda
+            Description: !Sub "Redirect handling for www.${RootDomainName}"
+    RedirectLambdaExecutionRole:
+        Type: AWS::IAM::Role
+        Properties:
+            AssumeRolePolicyDocument:
+                Version: 2012-10-17
+                Statement:
+                    - Effect: Allow
+                      Principal:
+                          Service:
+                              - edgelambda.amazonaws.com
+                              - lambda.amazonaws.com
+                      Action:
+                          - sts:AssumeRole
     FrontendRootBucket:
         Type: AWS::S3::Bucket
         Properties:
@@ -131,8 +136,8 @@ Resources:
                 Name: !Ref RootDomainName
                 Type: A
                 AliasTarget:
-                    HostedZoneId: !FindInMap [ RegionMap, !Ref 'AWS::Region', S3hostedzoneID]
-                    DNSName: !FindInMap [ RegionMap, !Ref 'AWS::Region', websiteendpoint]
+                    HostedZoneId: Z2FDTNDATAQYW2
+                    DNSName: !GetAtt CDN.DomainName
             -
                 Name: !Sub
                     - www.${Domain}
