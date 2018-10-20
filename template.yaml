@@ -69,7 +69,6 @@ Resources:
                     #ACMCertificateArn: ...
                     MinimumProtocolVersion: TLSv1.1_2016
                     #SSLSupportMethod: sni-only
-    #TODO: Attempt to speed up deploys by having cloudfront distro reference lambda alias.
     RedirectLambda:
         Type: AWS::Lambda::Function
         Properties:
