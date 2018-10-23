@@ -12,11 +12,39 @@ Parameters:
         Type: String
 
 Resources:
-    CDNAccessIdentity:
-        Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+    DNS:
+        Type: AWS::Route53::RecordSetGroup
         Properties:
-            CloudFrontOriginAccessIdentityConfig:
-                Comment: Access to frontend bucket
+            HostedZoneName: !Sub
+                - ${Domain}.
+                - Domain: !Ref RootDomainName
+            Comment: Zone apex alias.
+            RecordSets:
+            -
+                Name: !Ref RootDomainName
+                Type: A
+                AliasTarget:
+                    HostedZoneId: Z2FDTNDATAQYW2
+                    DNSName: !GetAtt CDN.DomainName
+            -
+                Name: !Sub
+                    - www.${Domain}
+                    - Domain: !Ref RootDomainName
+                Type: CNAME
+                TTL: 990
+                ResourceRecords:
+                - !GetAtt CDN.DomainName
+    #NOTE: Initial certificate validation requires manual dns entries before stack will deploy.
+    Certificate:
+        Type: AWS::CertificateManager::Certificate
+        Properties:
+            DomainName: !Ref RootDomainName
+            SubjectAlternativeNames:
+                - !Join
+                    - ''
+                    - - '*.'
+                      - !Ref RootDomainName
+            ValidationMethod: DNS
     CDN:
         Type: AWS::CloudFront::Distribution
         Properties:
@@ -63,12 +91,15 @@ Resources:
                         RestrictionType: whitelist
                         Locations:
                           - US
-                #TODO: Get certificate in place for https over custom domain
                 ViewerCertificate:
-                    CloudFrontDefaultCertificate: 'true'
-                    #ACMCertificateArn: ...
+                    AcmCertificateArn: !Ref Certificate
                     MinimumProtocolVersion: TLSv1.1_2016
-                    #SSLSupportMethod: sni-only
+                    SslSupportMethod: sni-only
+    CDNAccessIdentity:
+        Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+        Properties:
+            CloudFrontOriginAccessIdentityConfig:
+                Comment: Access to frontend bucket
     RedirectLambda:
         Type: AWS::Lambda::Function
         Properties:
@@ -123,28 +154,6 @@ Resources:
                       Principal:
                           CanonicalUser: !GetAtt CDNAccessIdentity.S3CanonicalUserId
             Bucket: !Ref FrontendRootBucket
-    DNS:
-        Type: AWS::Route53::RecordSetGroup
-        Properties:
-            HostedZoneName: !Sub
-                - ${Domain}.
-                - Domain: !Ref RootDomainName
-            Comment: Zone apex alias.
-            RecordSets:
-            -
-                Name: !Ref RootDomainName
-                Type: A
-                AliasTarget:
-                    HostedZoneId: Z2FDTNDATAQYW2
-                    DNSName: !GetAtt CDN.DomainName
-            -
-                Name: !Sub
-                    - www.${Domain}
-                    - Domain: !Ref RootDomainName
-                Type: CNAME
-                TTL: 990
-                ResourceRecords:
-                - !GetAtt CDN.DomainName
 
 Outputs:
     WebsiteURL:
