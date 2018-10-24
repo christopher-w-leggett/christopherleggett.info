@@ -1,9 +1,9 @@
 {
-  "name": "christopher-leggett-resume",
+  "name": "christopher-leggett-info",
   "version": "1.0.0",
   "description": "",
-  "main": "src/main/index.js",
-  "repository": "https://github.com/christopher-w-leggett/resume",
+  "main": "code-backend/src/main/index.js",
+  "repository": "https://github.com/christopher-w-leggett/christopherleggett.info",
   "author": "Christopher Leggett",
   "license": "UNLICENSED",
   "private": true,
@@ -11,9 +11,7 @@
     "axios": "^0.18.0"
   },
   "scripts": {
-    "start": "mkdir -p 'temp/run'; sam local start-api -t template.yaml & PID=`echo $!`; echo \"${PID}\" > temp/run/sam.pid",
-    "stop": "if [ -f 'temp/run/sam.pid' ]; then PID=`cat temp/run/sam.pid`; if [[ '' != \"${PID}\" ]]; then kill \"${PID}\"; echo '' > temp/run/sam.pid; fi fi",
-    "test": "mocha --use_strict src/test/"
+    "test": "mocha --use_strict code-backend/src/test/"
   },
   "devDependencies": {
     "chai": "^4.1.2",

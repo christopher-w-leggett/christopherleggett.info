@@ -13,14 +13,15 @@ const properties = require('./gulp/properties.js');
 //set constants
 const TEMP_DIR = 'temp'
 const BUILD_DIR = TEMP_DIR + '/build';
-const PACKAGE_FILES = ['package.json', 'package-lock.json', 'src/main/**'];
+const BACKEND_BUILD_DIR = BUILD_DIR + '/code-backend';
+const PACKAGE_FILES = ['package.json', 'package-lock.json', 'code-backend/src/main/**'];
 
 gulp.task('clean', () => {
     return del([TEMP_DIR]);
 });
 
-gulp.task('build', ['clean'], async () => {
-    const archiveDir = BUILD_DIR + '/' + await properties.read('code-archive-name', true)
+gulp.task('build-backend', ['clean'], async () => {
+    const archiveDir = BACKEND_BUILD_DIR + '/' + await properties.read('backend-code-archive-name', true)
 
     return gulp.src(PACKAGE_FILES)
         .pipe(gulp.dest(archiveDir))
@@ -30,22 +31,22 @@ gulp.task('build', ['clean'], async () => {
         .pipe(sink.object());
 });
 
-gulp.task('package', ['build'], async () => {
+gulp.task('package-backend', ['build-backend'], async () => {
     return gulp.src([
-            BUILD_DIR + '/' + await properties.read('code-archive-name', true) + '/**'
+            BACKEND_BUILD_DIR + '/' + await properties.read('backend-code-archive-name', true) + '/**'
         ])
-        .pipe(zip(await properties.read('code-archive-name', true) + '.zip'))
-        .pipe(gulp.dest(BUILD_DIR));
+        .pipe(zip(await properties.read('backend-code-archive-name', true) + '.zip'))
+        .pipe(gulp.dest(BACKEND_BUILD_DIR));
 });
 
-gulp.task('upload', ['package'], async () => {
+gulp.task('upload-backend', ['package-backend'], async () => {
     //read properties
-    const s3Bucket = await properties.read('s3-bucket', true);
+    const s3Bucket = await properties.read('backend-s3-bucket', true);
     const profile = await properties.read('profile', true);
 
     //construct upload command
     let uploadCmdString = 'aws cloudformation package --template-file template.yaml --output-template-file ' +
-        BUILD_DIR + '/output-template.yaml --s3-bucket ' + s3Bucket;
+        BACKEND_BUILD_DIR + '/output-template.yaml --s3-bucket ' + s3Bucket;
     if (profile) {
         uploadCmdString += ' --profile ' + profile;
     }
@@ -60,13 +61,13 @@ gulp.task('upload', ['package'], async () => {
     return uploadCmd;
 });
 
-gulp.task('deploy', ['upload'], async () => {
+gulp.task('deploy-backend', ['upload-backend'], async () => {
     //ensure required properties
     const stackName = await properties.read('stack-name', true);
     const profile = await properties.read('profile', true);
 
     //construct deploy command
-    let deployCmdString = 'aws cloudformation deploy --template-file ' + BUILD_DIR + '/output-template.yaml --stack-name ' +
+    let deployCmdString = 'aws cloudformation deploy --template-file ' + BACKEND_BUILD_DIR + '/output-template.yaml --stack-name ' +
         stackName + ' --capabilities CAPABILITY_IAM';
     if (profile) {
         deployCmdString += ' --profile ' + profile;
@@ -81,7 +82,7 @@ gulp.task('deploy', ['upload'], async () => {
     });
     return deployCmd;
 });
-
+//TODO: Add task to push up content to frontend S3 bucket.
 gulp.task('watch', () => {
     let watchTimeout = null,
         watchBuildRunning = false,
@@ -90,7 +91,7 @@ gulp.task('watch', () => {
             if (!watchTimeout || watchBuildRunning) {
                 watchTimeout = setTimeout(() => {
                     watchBuildRunning = true;
-                    gulp.start('package', () => {
+                    gulp.start('package-backend', () => {
                         watchTimeout = null;
                         watchBuildRunning = false;
                     });

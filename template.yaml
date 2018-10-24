@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 # Transform: AWS::Serverless-2016-10-31
-Description: Christopher Leggett Resume
+Description: Christopher Leggett Info Website
 
 #Globals:
 #    Function:
@@ -34,7 +34,7 @@ Resources:
                 TTL: 990
                 ResourceRecords:
                 - !GetAtt CDN.DomainName
-    #NOTE: Initial certificate validation requires manual dns entries before stack will deploy.
+    #Initial certificate validation requires manual dns entries before stack will deploy.
     Certificate:
         Type: AWS::CertificateManager::Certificate
         Properties:
@@ -54,12 +54,16 @@ Resources:
                     - !Sub
                         - www.${Domain}
                         - Domain: !Ref RootDomainName
-                #TODO: CustomErrorResponses section
+                CustomErrorResponses:
+                    - ErrorCode: 403
+                      ResponseCode: 404
+                      ResponsePagePath: /errors/404.html
                 Origins:
                     - DomainName: !Sub
                           - ${Domain}.s3.amazonaws.com
                           - Domain: !Ref RootDomainName
                       Id: FrontendS3Origin
+                      OriginPath: /root
                       S3OriginConfig:
                           OriginAccessIdentity: !Sub
                               - origin-access-identity/cloudfront/${OriginAccessId}
@@ -84,7 +88,7 @@ Resources:
                     ViewerProtocolPolicy: redirect-to-https
                     LambdaFunctionAssociations:
                         - EventType: viewer-request
-                          LambdaFunctionARN: !Ref RedirectLambdaVersion9
+                          LambdaFunctionARN: !Ref RedirectLambdaVersion10
                 PriceClass: PriceClass_100
                 Restrictions:
                     GeoRestriction:
@@ -105,12 +109,12 @@ Resources:
         Properties:
             Description: >
                 Edge Lambda performing domain redirects.
-            Code: temp/build/christopherleggett.info.zip
+            Code: temp/build/code-backend/christopherleggett.info.zip
             Handler: edge/redirects/index.handler
             MemorySize: 128
             Role: !GetAtt RedirectLambdaExecutionRole.Arn
             Runtime: nodejs8.10
-    RedirectLambdaVersion9:
+    RedirectLambdaVersion10:
         Type: AWS::Lambda::Version
         Properties:
             FunctionName: !Ref RedirectLambda
@@ -135,7 +139,6 @@ Resources:
             AccessControl: BucketOwnerFullControl
             WebsiteConfiguration:
                 IndexDocument: index.html
-                ErrorDocument: 404.html
     FrontendRootBucketCDNPolicy:
         Type: AWS::S3::BucketPolicy
         Properties:

@@ -6,20 +6,38 @@ const inquirer = require('inquirer');
 
 //define properties
 const PROPERTY_DEFINITIONS = {
-    's3-bucket': {
+    'backend-s3-bucket': {
         'validation': {
             'required': true,
             'regex': /^[a-z0-9\.\-]+$/
         },
         'prompt': {
             'type': 'input',
-            'name': 's3-bucket',
+            'name': 'backend-s3-bucket',
             'message': 'Please provide a valid S3 bucket:',
             'validate': (input) => {
-                if (validator.valid(input, PROPERTY_DEFINITIONS['s3-bucket'].validation)) {
+                if (validator.valid(input, PROPERTY_DEFINITIONS['backend-s3-bucket'].validation)) {
                     return true;
                 } else {
                     return 'Invalid S3 bucket provided.';
+                }
+            }
+        }
+    },
+    'backend-code-archive-name': {
+        'validation': {
+            'required': true,
+            'regex': /^[a-z0-9\.\-]+$/
+        },
+        'prompt': {
+            'type': 'input',
+            'name': 'backend-code-archive-name',
+            'message': 'Please provide a valid name for the built code archive:',
+            'validate': (input) => {
+                if (validator.valid(input, PROPERTY_DEFINITIONS['backend-code-archive-name'].validation)) {
+                    return true;
+                } else {
+                    return 'Invalid code archive name provided.';
                 }
             }
         }
@@ -55,24 +73,6 @@ const PROPERTY_DEFINITIONS = {
                     return true;
                 } else {
                     return 'Invalid AWS CLI profile provided.';
-                }
-            }
-        }
-    },
-    'code-archive-name': {
-        'validation': {
-            'required': true,
-            'regex': /^[a-z0-9\.\-]+$/
-        },
-        'prompt': {
-            'type': 'input',
-            'name': 'code-archive-name',
-            'message': 'Please provide a valid name for the built code archive:',
-            'validate': (input) => {
-                if (validator.valid(input, PROPERTY_DEFINITIONS['code-archive-name'].validation)) {
-                    return true;
-                } else {
-                    return 'Invalid code archive name provided.';
                 }
             }
         }
