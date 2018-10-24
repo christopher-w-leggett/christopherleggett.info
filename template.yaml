@@ -34,7 +34,7 @@ Resources:
                 TTL: 990
                 ResourceRecords:
                 - !GetAtt CDN.DomainName
-    #Initial certificate validation requires manual dns entries before stack will deploy.
+    #Initial certificate validation requires manual dns entries before stack deployment completes.
     Certificate:
         Type: AWS::CertificateManager::Certificate
         Properties:

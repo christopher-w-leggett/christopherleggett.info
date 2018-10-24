@@ -42,6 +42,16 @@ const PROPERTY_DEFINITIONS = {
             }
         }
     },
+    'backend-code-archive-files': {
+        'validation': {
+            'required': true
+        }
+    },
+    'backend-code-build-dir': {
+        'validation': {
+            'required': true
+        }
+    },
     'stack-name': {
         'validation': {
             'required': true,
@@ -102,10 +112,20 @@ module.exports = {
     read: async (name, prompt) => {
         let value;
 
-        if (!properties.hasOwnProperty(name) && prompt && PROPERTY_DEFINITIONS[name] && PROPERTY_DEFINITIONS[name].prompt) {
-            console.info('Configure ' + name + ' property in "' + PROPERTIES_FILE + '" to suppress prompt.');
-            let promptValue = await inquirer.prompt([PROPERTY_DEFINITIONS[name].prompt]);
-            value = promptValue[name];
+        if (!properties.hasOwnProperty(name)) {
+            if (PROPERTY_DEFINITIONS[name]) {
+                if (prompt && PROPERTY_DEFINITIONS[name].prompt) {
+                    console.info('Configure ' + name + ' property in "' + PROPERTIES_FILE + '" to suppress prompt.');
+                    let promptValue = await inquirer.prompt([PROPERTY_DEFINITIONS[name].prompt]);
+                    value = promptValue[name];
+                } else if (!PROPERTY_DEFINITIONS[name].validation.required) {
+                    value = null;
+                } else {
+                    throw new Error('Required property ' + name + ' not configured in ' + PROPERTIES_FILE + '.');
+                }
+            } else {
+                throw new Error('Invalid property ' + name + ' being requested.');
+            }
         } else {
             value = properties[name];
         }

@@ -9,8 +9,12 @@ module.exports = {
 
             if (!value && !options.required) {
                 isValid = true;
-            } else if (options.regex) {
-                isValid = value && value.match && value.match(options.regex);
+            } else if(value) {
+                if (options.regex) {
+                    isValid = value && value.match && value.match(options.regex);
+                } else {
+                    isValid = true;
+                }
             }
         }
 
