@@ -4,12 +4,15 @@
 const validator = require('./validator.js');
 const inquirer = require('inquirer');
 
+//reused validation configs
+const s3BucketRegex = /^[a-z0-9\.\-]+$/;
+
 //define properties
 const PROPERTY_DEFINITIONS = {
     'backend-s3-bucket': {
         'validation': {
             'required': true,
-            'regex': /^[a-z0-9\.\-]+$/
+            'regex': s3BucketRegex
         },
         'prompt': {
             'type': 'input',
@@ -24,17 +27,17 @@ const PROPERTY_DEFINITIONS = {
             }
         }
     },
-    'backend-code-archive-name': {
+    'backend-archive-name': {
         'validation': {
             'required': true,
             'regex': /^[a-z0-9\.\-]+$/
         },
         'prompt': {
             'type': 'input',
-            'name': 'backend-code-archive-name',
+            'name': 'backend-archive-name',
             'message': 'Please provide a valid name for the built code archive:',
             'validate': (input) => {
-                if (validator.valid(input, PROPERTY_DEFINITIONS['backend-code-archive-name'].validation)) {
+                if (validator.valid(input, PROPERTY_DEFINITIONS['backend-archive-name'].validation)) {
                     return true;
                 } else {
                     return 'Invalid code archive name provided.';
@@ -42,12 +45,40 @@ const PROPERTY_DEFINITIONS = {
             }
         }
     },
-    'backend-code-archive-files': {
+    'backend-files': {
         'validation': {
             'required': true
         }
     },
-    'backend-code-build-dir': {
+    'backend-build-dir': {
+        'validation': {
+            'required': true
+        }
+    },
+    'frontend-s3-bucket': {
+        'validation': {
+            'required': true,
+            'regex': s3BucketRegex
+        },
+        'prompt': {
+            'type': 'input',
+            'name': 'frontend-s3-bucket',
+            'message': 'Please provide a valid S3 bucket:',
+            'validate': (input) => {
+                if (validator.valid(input, PROPERTY_DEFINITIONS['frontend-s3-bucket'].validation)) {
+                    return true;
+                } else {
+                    return 'Invalid S3 bucket provided.';
+                }
+            }
+        }
+    },
+    'frontend-content-files': {
+        'validation': {
+            'required': true
+        }
+    },
+    'frontend-build-dir': {
         'validation': {
             'required': true
         }

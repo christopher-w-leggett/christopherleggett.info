@@ -11,25 +11,25 @@ const exec = util.promisify(require('child_process').exec);
 const properties = require('../../properties.js');
 
 const taskNames = {
-    clean: 'clean-backend',
-    build: 'build-backend',
-    package: 'package-backend',
-    upload: 'upload-backend',
-    deploy: 'deploy-backend'
+    clean: 'backend-clean',
+    build: 'backend-build',
+    package: 'backend-package',
+    upload: 'backend-upload',
+    deploy: 'backend-deploy'
 }
 
 module.exports = {
     taskNames: taskNames,
     registerTasks: () => {
         gulp.task(taskNames.clean, async () => {
-            const buildDir = await properties.read('backend-code-build-dir', false);
+            const buildDir = await properties.read('backend-build-dir', false);
             return del([buildDir]);
         });
 
         gulp.task(taskNames.build, [taskNames.clean], async () => {
-            const buildDir = await properties.read('backend-code-build-dir', false);
-            const archiveFiles = await properties.read('backend-code-archive-files', false);
-            const archiveName = await properties.read('backend-code-archive-name', true);
+            const buildDir = await properties.read('backend-build-dir', false);
+            const archiveFiles = await properties.read('backend-files', false);
+            const archiveName = await properties.read('backend-archive-name', true);
             const archiveDir = buildDir + '/' + archiveName;
 
             return gulp.src(archiveFiles)
@@ -41,8 +41,8 @@ module.exports = {
         });
 
         gulp.task(taskNames.package, [taskNames.build], async () => {
-            const buildDir = await properties.read('backend-code-build-dir', false);
-            const archiveName = await properties.read('backend-code-archive-name', true);
+            const buildDir = await properties.read('backend-build-dir', false);
+            const archiveName = await properties.read('backend-archive-name', true);
 
             return gulp.src([
                     buildDir + '/' + archiveName + '/**'
@@ -53,7 +53,7 @@ module.exports = {
 
         gulp.task(taskNames.upload, [taskNames.package], async () => {
             //read properties
-            const buildDir = await properties.read('backend-code-build-dir', false);
+            const buildDir = await properties.read('backend-build-dir', false);
             const s3Bucket = await properties.read('backend-s3-bucket', true);
             const profile = await properties.read('profile', true);
 
@@ -76,7 +76,7 @@ module.exports = {
 
         gulp.task(taskNames.deploy, [taskNames.upload], async () => {
             //ensure required properties
-            const buildDir = await properties.read('backend-code-build-dir', false);
+            const buildDir = await properties.read('backend-build-dir', false);
             const stackName = await properties.read('stack-name', true);
             const profile = await properties.read('profile', true);
 

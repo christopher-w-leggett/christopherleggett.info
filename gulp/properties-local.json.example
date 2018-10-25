@@ -1,8 +1,11 @@
 {
     "backend-s3-bucket": "<bucket-name>",
-    "backend-code-archive-name": "<archive-name>",
-    "backend-code-archive-files": ["<archive-files...>"],
-    "backend-code-build-dir": "<build-dir>",
+    "backend-archive-name": "<archive-name>",
+    "backend-files": ["<files...>"],
+    "backend-build-dir": "<build-dir>",
+    "frontend-s3-bucket": "<bucket-name>",
+    "frontend-content-files": ["<files...>"],
+    "frontend-build-dir": "<build-dir>",
     "profile": "<aws-cli-profile>",
     "stack-name": "<cloudformation-stack-name>"
 }

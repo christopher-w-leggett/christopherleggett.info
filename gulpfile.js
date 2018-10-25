@@ -2,12 +2,19 @@
 
 //load dependencies
 const gulp = require('gulp');
-const backendTasks = require('./gulp/build/backend');
+const backend = require('./gulp/build/backend');
+const frontend = require('./gulp/build/frontend');
 
 //register backend tasks
-backendTasks.registerTasks();
+backend.registerTasks();
 
-//TODO: Add task to push up content to frontend S3 bucket.
+//register frontend tasks
+frontend.registerTasks();
+
+//register global tasks
+gulp.task('deploy', [backend.taskNames.deploy, frontend.taskNames.deploy], async () => {
+
+});
 
 //TODO: Update watch so it includes all builds.
 gulp.task('watch', () => {
@@ -18,7 +25,7 @@ gulp.task('watch', () => {
             if (!watchTimeout || watchBuildRunning) {
                 watchTimeout = setTimeout(() => {
                     watchBuildRunning = true;
-                    gulp.start(backendTasks.taskNames.package, () => {
+                    gulp.start(backend.taskNames.package, () => {
                         watchTimeout = null;
                         watchBuildRunning = false;
                     });
