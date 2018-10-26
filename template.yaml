@@ -158,20 +158,21 @@ Resources:
                           CanonicalUser: !GetAtt CDNAccessIdentity.S3CanonicalUserId
             Bucket: !Ref FrontendRootBucket
 
+    #Backend Lambdas
+    Main:
+        Type: AWS::Serverless::Function
+        Properties:
+            CodeUri: temp/build/code-backend/christopherleggett.info.zip
+            Handler: index.helloWorld
+            Runtime: nodejs8.10
+            Events:
+                HelloWorldGET:
+                    Type: Api
+                    Properties:
+                        Path: /hello
+                        Method: get
+
 Outputs:
     WebsiteURL:
         Value: !GetAtt CDN.DomainName
         Description: The URL for the website.
-
-#    Main:
-#        Type: AWS::Serverless::Function
-#        Properties:
-#            CodeUri: temp/build/christopherleggett.info.zip
-#            Handler: index.helloWorld
-#            Runtime: nodejs8.10
-#            Events:
-#                HelloWorldGET:
-#                    Type: Api
-#                    Properties:
-#                        Path: /hello
-#                        Method: get

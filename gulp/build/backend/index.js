@@ -30,7 +30,7 @@ module.exports = {
             const buildDir = await properties.read('backend-build-dir', false);
             const archiveFiles = await properties.read('backend-files', false);
             const archiveName = await properties.read('backend-archive-name', true);
-            const archiveDir = buildDir + '/' + archiveName;
+            const archiveDir = `${buildDir}/${archiveName}`;
 
             return gulp.src(archiveFiles)
                 .pipe(gulp.dest(archiveDir))
@@ -45,9 +45,9 @@ module.exports = {
             const archiveName = await properties.read('backend-archive-name', true);
 
             return gulp.src([
-                    buildDir + '/' + archiveName + '/**'
+                    `${buildDir}/${archiveName}/**`
                 ])
-                .pipe(zip(archiveName + '.zip'))
+                .pipe(zip(`${archiveName}.zip`))
                 .pipe(gulp.dest(buildDir));
         });
 
@@ -58,10 +58,9 @@ module.exports = {
             const profile = await properties.read('profile', true);
 
             //construct upload command
-            let uploadCmdString = 'aws cloudformation package --template-file template.yaml --output-template-file ' +
-                buildDir + '/output-template.yaml --s3-bucket ' + s3Bucket;
+            let uploadCmdString = `aws cloudformation package --template-file template.yaml --output-template-file ${buildDir}/output-template.yaml --s3-bucket ${s3Bucket}`;
             if (profile) {
-                uploadCmdString += ' --profile ' + profile;
+                uploadCmdString += ` --profile ${profile}`;
             }
 
             //execute command
@@ -81,10 +80,9 @@ module.exports = {
             const profile = await properties.read('profile', true);
 
             //construct deploy command
-            let deployCmdString = 'aws cloudformation deploy --template-file ' + buildDir + '/output-template.yaml --stack-name ' +
-                stackName + ' --capabilities CAPABILITY_IAM';
+            let deployCmdString = `aws cloudformation deploy --template-file ${buildDir}/output-template.yaml --stack-name ${stackName} --capabilities CAPABILITY_IAM`;
             if (profile) {
-                deployCmdString += ' --profile ' + profile;
+                deployCmdString += ` --profile ${profile}`;
             }
 
             //execute command

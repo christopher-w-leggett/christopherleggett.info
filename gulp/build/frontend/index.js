@@ -39,9 +39,9 @@ module.exports = {
             const profile = await properties.read('profile', true);
 
             //construct sync command
-            let syncCmdString = 'aws s3 sync ' + buildDir + ' s3://' + s3Bucket + '/';
+            let syncCmdString = `aws s3 sync ${buildDir} s3://${s3Bucket}/`;
             if (profile) {
-                syncCmdString += ' --profile ' + profile;
+                syncCmdString += ` --profile ${profile}`;
             }
 
             //execute command
