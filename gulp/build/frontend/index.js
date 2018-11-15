@@ -3,6 +3,9 @@
 //load dependencies
 const del = require('del');
 const gulp = require('gulp');
+const webpack = require('webpack');
+const gulpWebpack = require('webpack-stream');
+const webpackConfig = require('../../../webpack.config.js');
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
 const properties = require('../../properties.js');
@@ -31,6 +34,13 @@ module.exports = {
         });
 
         gulp.task(taskNames.build, [taskNames.copyContent], async () => {
+            const codeEntryFile = await properties.read('frontend-code-entry-file', false);
+            const codeBuildDir = await properties.read('frontend-code-build-dir', false);
+            const codeFileName = await properties.read('frontend-code-file-name', false);
+
+            return gulp.src(codeEntryFile)
+                .pipe(gulpWebpack(await webpackConfig(), webpack))
+                .pipe(gulp.dest(`${codeBuildDir}/`));
         });
 
         gulp.task(taskNames.deploy, [taskNames.build], async () => {

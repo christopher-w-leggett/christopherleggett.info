@@ -44,7 +44,7 @@ gulp.task('run', [backend.taskNames.package, frontend.taskNames.build], async ()
             }
         });
 
-    //watch frontend files
+    //watch frontend files TODO: Add code files to watch
     let frontendWatchTimeout = null,
         frontendBuildRunning = false,
         frontendWatcher = gulp.watch(frontendContentFiles, (event) => {

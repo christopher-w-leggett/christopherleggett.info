@@ -6,6 +6,9 @@
     "frontend-s3-bucket": "<bucket-name>",
     "frontend-content-files": ["<files...>"],
     "frontend-build-dir": "<build-dir>",
+    "frontend-code-entry-file": "<file-name>",
+    "frontend-code-build-dir": "<dir-name>",
+    "frontend-code-file-name": "<file-name>",
     "profile": "<aws-cli-profile>",
     "stack-name": "<cloudformation-stack-name>"
 }

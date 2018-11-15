@@ -8,7 +8,9 @@
   "license": "UNLICENSED",
   "private": true,
   "dependencies": {
-    "axios": "^0.18.0"
+    "axios": "^0.18.0",
+    "react": "^16.6.3",
+    "react-dom": "^16.6.3"
   },
   "scripts": {
     "test": "mocha --use_strict code-backend/src/test/"
@@ -21,6 +23,12 @@
     "gulp-zip": "^4.1.0",
     "gulp-install": "^1.1.0",
     "stream-sink": "^2.2.2",
-    "inquirer": "^6.0.0"
+    "inquirer": "^6.0.0",
+    "webpack": "^4.25.1",
+    "webpack-stream": "^5.1.1",
+    "babel-loader": "^8.0.4",
+    "@babel/core": "^7.1.6",
+    "@babel/preset-env": "7.1.6",
+    "@babel/preset-react": "^7.0.0"
   }
 }

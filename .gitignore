@@ -4,6 +4,9 @@
 # Node
 node_modules
 
+# Mac
+.DS_Store
+
 # Project Specific Ignore
 temp
 gulp/properties-*.json
