@@ -22,11 +22,11 @@ gulp.task('deploy', [backend.taskNames.deploy, frontend.taskNames.deploy], async
 gulp.task('run', [backend.taskNames.package, frontend.taskNames.build], async () => {
     const backendFiles = await properties.read('backend-files', false);
     const frontendBuildDir = await properties.read('frontend-build-dir', false);
-    const frontendContentFiles = await properties.read('frontend-content-files', false);
+    const frontendContentFiles = await properties.read('frontend-content-watch-files', false);
     const frontendCodeFiles = await properties.read('frontend-code-files', false);
 
     //start sam
-    const startCmdString = `sam local start-api -t template.yaml -s ${frontendBuildDir}/root`;
+    const startCmdString = `sam local start-api -t template.yaml -s ${frontendBuildDir}`;
     const startCmd = exec(startCmdString);
 
     //watch backend files

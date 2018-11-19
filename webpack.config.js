@@ -1,13 +1,43 @@
 const path = require('path');
 const properties = require('./gulp/properties.js');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const glob = require('glob');
+
+const isDevelopment = process.env.NODE_ENV !== 'production';
 
 module.exports = async () => {
+    const buildDir = await properties.read('frontend-build-dir', false);
     const codeEntryFile = await properties.read('frontend-code-entry-file', false);
-    const codeFileName = await properties.read('frontend-code-file-name', false);
+    const codeBuildDir = await properties.read('frontend-code-build-dir', false);
+    const contentRootDir = await properties.read('frontend-content-root-dir', false);
 
+    //build content files for html generation.
+    const contentPlugins = glob.sync(
+        '**/*.handlebars',
+        { cwd: contentRootDir }
+    ).map((file) => {
+        return new HtmlWebpackPlugin({
+            filename: `${file.substring(0, file.length - '.handlebars'.length)}.html`,
+            template: `${contentRootDir}/${file}`,
+            minify: !isDevelopment && {
+                html5: true,
+                collapseWhitespace: true,
+                caseSensitive: true,
+                removeComments: true,
+                removeEmptyElements: true
+            }
+        });
+    });
+
+    //return webpack config
     return {
         entry: './' + codeEntryFile,
-        output: { filename: codeFileName },
+        output: {
+            path: path.resolve(__dirname, buildDir),
+            filename: `${codeBuildDir}/[hash].js`
+        },
+        devtool: isDevelopment && 'source-map',
+        mode: isDevelopment ? 'development' : 'production',
         module: {
             rules: [
                 {
@@ -19,8 +49,16 @@ module.exports = async () => {
                             presets: ['@babel/preset-env', '@babel/preset-react']
                         }
                     }
+                },
+                {
+                    test: /\.handlebars$/,
+                    exclude: /node_modules/,
+                    use: {
+                        loader: 'handlebars-loader'
+                    }
                 }
             ]
-        }
+        },
+        plugins: [...contentPlugins]
     };
 };
