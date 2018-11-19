@@ -19,13 +19,7 @@ module.exports = async () => {
         return new HtmlWebpackPlugin({
             filename: `${file.substring(0, file.length - '.handlebars'.length)}.html`,
             template: `${contentRootDir}/${file}`,
-            minify: !isDevelopment && {
-                html5: true,
-                collapseWhitespace: true,
-                caseSensitive: true,
-                removeComments: true,
-                removeEmptyElements: true
-            }
+            minify: !isDevelopment
         });
     });
 

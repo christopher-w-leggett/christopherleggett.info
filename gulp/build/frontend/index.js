@@ -5,7 +5,7 @@ const del = require('del');
 const gulp = require('gulp');
 const webpack = require('webpack');
 const gulpWebpack = require('webpack-stream');
-const webpackConfig = require('../../../webpack.config.js');
+const buildWebpackConfig = require('../../../webpack.config.js');
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
 const properties = require('../../properties.js');
@@ -27,10 +27,15 @@ module.exports = {
         gulp.task(taskNames.build, [taskNames.clean], async () => {
             const buildDir = await properties.read('frontend-build-dir', false);
             const codeEntryFile = await properties.read('frontend-code-entry-file', false);
+            const webpackConfig = await buildWebpackConfig();
 
-            return gulp.src(codeEntryFile)
-                .pipe(gulpWebpack(await webpackConfig(), webpack))
-                .pipe(gulp.dest(`${buildDir}`));
+            return new Promise(function(resolve, reject) {
+                gulp.src(codeEntryFile)
+                    .pipe(gulpWebpack(webpackConfig, webpack))
+                    .on('error', reject)
+                    .pipe(gulp.dest(`${buildDir}`))
+                    .on('end', resolve);
+            });
         });
 
         gulp.task(taskNames.deploy, [taskNames.build], async () => {
@@ -39,7 +44,7 @@ module.exports = {
             const profile = await properties.read('profile', true);
 
             //construct sync command
-            let syncCmdString = `aws s3 sync ${buildDir} s3://${s3Bucket}/`;
+            let syncCmdString = `aws s3 sync ${buildDir} s3://${s3Bucket}/root/`;
             if (profile) {
                 syncCmdString += ` --profile ${profile}`;
             }
