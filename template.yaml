@@ -113,7 +113,7 @@ Resources:
             Handler: edge/redirects/index.handler
             MemorySize: 128
             Role: !GetAtt RedirectLambdaExecutionRole.Arn
-            Runtime: nodejs8.10
+            Runtime: nodejs10.x
     RedirectLambdaVersion10:
         Type: AWS::Lambda::Version
         Properties:
@@ -159,18 +159,30 @@ Resources:
             Bucket: !Ref FrontendRootBucket
 
     #Backend Lambdas
-    Main:
+    PickName:
         Type: AWS::Serverless::Function
         Properties:
             CodeUri: temp/build/code-backend/christopherleggett.info.zip
-            Handler: index.helloWorld
-            Runtime: nodejs8.10
+            Handler: index.pickName
+            Runtime: nodejs10.x
             Events:
                 HelloWorldGET:
                     Type: Api
                     Properties:
-                        Path: /hello
-                        Method: get
+                        Path: /pick-name
+                        Method: post
+    RevealName:
+        Type: AWS::Serverless::Function
+        Properties:
+            CodeUri: temp/build/code-backend/christopherleggett.info.zip
+            Handler: index.revealName
+            Runtime: nodejs10.x
+            Events:
+                HelloWorldGET:
+                    Type: Api
+                    Properties:
+                        Path: /reveal-name
+                        Method: post
 
 Outputs:
     WebsiteURL:

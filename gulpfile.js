@@ -26,7 +26,7 @@ gulp.task('run', [backend.taskNames.package, frontend.taskNames.build], async ()
     const frontendCodeFiles = await properties.read('frontend-code-files', false);
 
     //start sam
-    const startCmdString = `sam local start-api -t template.yaml -s ${frontendBuildDir}`;
+    const startCmdString = `sam local start-api -t template.yaml -s ${frontendBuildDir} > "temp/sam.log" 2>&1`;
     const startCmd = exec(startCmdString);
 
     //watch backend files

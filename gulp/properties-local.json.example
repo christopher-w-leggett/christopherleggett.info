@@ -1,15 +1,18 @@
 {
-    "backend-s3-bucket": "<bucket-name>",
-    "backend-archive-name": "<archive-name>",
-    "backend-files": ["<files...>"],
-    "backend-build-dir": "<build-dir>",
-    "frontend-s3-bucket": "<bucket-name>",
-    "frontend-build-dir": "<build-dir>",
-    "frontend-content-watch-files": ["<files...>"],
-    "frontend-content-root-dir": "<dir-name>",
-    "frontend-code-files": ["<files...>"],
-    "frontend-code-entry-file": "<file-name>",
-    "frontend-code-build-dir": "<dir-name>",
-    "profile": "<aws-cli-profile>",
-    "stack-name": "<cloudformation-stack-name>"
+    "backend-s3-bucket": "christopherleggett.info-backend",
+    "backend-archive-name": "christopherleggett.info",
+    "backend-files": [
+        "package.json", "package-lock.json", "code-backend/src/main/**"
+    ],
+    "backend-build-dir": "temp/build/code-backend",
+    "frontend-s3-bucket": "christopherleggett.info",
+    "frontend-build-dir": "temp/build/code-frontend/root",
+    "frontend-content-watch-files": ["content/**", "!**/.DS_Store"],
+    "frontend-content-root-dir": "content/root",
+    "frontend-code-files": ["code-frontend/src/main/**", "!**/.DS_Store"],
+    "frontend-code-entry-file": "code-frontend/src/main/App.jsx",
+    "frontend-code-build-dir": "js",
+    "frontend-styles-build-dir": "css",
+    "profile": "admin",
+    "stack-name": "christopherleggett-info-stack"
 }

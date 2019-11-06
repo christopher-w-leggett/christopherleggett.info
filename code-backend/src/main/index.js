@@ -1,16 +1,26 @@
 'use strict'
 
-const axios = require('axios')
-const url = 'http://checkip.amazonaws.com/';
-
-module.exports.helloWorld = async (event, context, callback) => {
+module.exports.pickName = async (event, context, callback) => {
     try {
-        const ret = await axios(url);
         return {
             'statusCode': 200,
             'body': JSON.stringify({
-                message: 'hello world',
-                location: ret.data.trim()
+                selection: 'selection-token',
+                hat: 'new-hat'
+            })
+        };
+    } catch (err) {
+        console.error(err);
+        throw err;
+    }
+};
+
+module.exports.revealName = async (event, context, callback) => {
+    try {
+        return {
+            'statusCode': 200,
+            'body': JSON.stringify({
+                name: 'Chris'
             })
         };
     } catch (err) {

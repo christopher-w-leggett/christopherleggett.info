@@ -1,6 +1,7 @@
 const path = require('path');
 const properties = require('./gulp/properties.js');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const glob = require('glob');
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
@@ -9,6 +10,7 @@ module.exports = async () => {
     const buildDir = await properties.read('frontend-build-dir', false);
     const codeEntryFile = await properties.read('frontend-code-entry-file', false);
     const codeBuildDir = await properties.read('frontend-code-build-dir', false);
+    const stylesBuildDir = await properties.read('frontend-styles-build-dir', false);
     const contentRootDir = await properties.read('frontend-content-root-dir', false);
 
     //build content files for html generation.
@@ -45,6 +47,22 @@ module.exports = async () => {
                     }
                 },
                 {
+                    test: /\.scss$/,
+                    exclude: /node_modules/,
+                    use: [
+                        MiniCssExtractPlugin.loader,
+                        'css-loader',
+                        'sass-loader'
+                    ]
+                },
+                {
+                    test: /\.css$/,
+                    use: [
+                        'style-loader',
+                        'css-loader'
+                    ]
+                },
+                {
                     test: /\.handlebars$/,
                     exclude: /node_modules/,
                     use: {
@@ -53,6 +71,23 @@ module.exports = async () => {
                 }
             ]
         },
-        plugins: [...contentPlugins]
+        // optimization: {
+        //     splitChunks: {
+        //         cacheGroups: {
+        //             styles: {
+        //                 name: 'styles',
+        //                 test: /\.css$/,
+        //                 chunks: 'all',
+        //                 enforce: true
+        //             }
+        //         }
+        //     }
+        // },
+        plugins: [
+            new MiniCssExtractPlugin({
+                filename: `${stylesBuildDir}/[hash].css`
+            }),
+            ...contentPlugins
+        ]
     };
 };

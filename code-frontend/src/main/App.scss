@@ -1,0 +1,13 @@
+.pick-name-form-result {
+    overflow: scroll;
+
+    &__selection-title {
+        font-weight: bold;
+        margin: 0;
+    }
+
+    &__new-hat-title {
+        font-weight: bold;
+        margin: 0;
+    }
+}
