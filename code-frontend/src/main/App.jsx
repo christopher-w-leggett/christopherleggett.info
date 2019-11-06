@@ -66,14 +66,31 @@ class App extends React.Component {
     }
 
     async onRevealNameSubmit(event) {
+        event.preventDefault();
+        event.stopPropagation();
+
         const form = event.target;
 
-        if(form.checkValidity() === false) {
-            event.preventDefault();
-            event.stopPropagation();
+        if(form.checkValidity() === true) {
+            this.setState({
+                name: ''
+            });
+            const response = await fetch('http://localhost:3000/reveal-name', {
+                method: 'POST',
+                mode: 'cors',
+                cache: 'no-cache',
+                credentials: 'omit',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(this.toJSONString(form))
+            });
+            const json = await response.json();
+            this.setState({
+                name: json.name || ''
+            });
         }
 
-        console.log(this.toJSONString(form));
         form.classList.add('was-validated');
     }
 
@@ -87,6 +104,14 @@ class App extends React.Component {
                 <p>{selection}</p>
                 <p className="pick-name-form-result__new-hat-title">Pass the following hat to the next person.</p>
                 <p>{hat}</p>
+            </div>;
+        }
+
+        let revealNameResult = null;
+        if(name) {
+            revealNameResult = <div className="alert alert-success reveal-name-form-result" role="alert">
+                <p className="reveal-name-form-result__name-title">Selected Name.</p>
+                <p>{name}</p>
             </div>;
         }
 
@@ -137,6 +162,7 @@ class App extends React.Component {
                                 </div>
                             </div>
                         </form>
+                        {revealNameResult}
                     </div>
                 </div>
             </div>
