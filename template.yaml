@@ -2,13 +2,18 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: Christopher Leggett Info Website
 
-#Globals:
-#    Function:
-#        Timeout: 3
+Globals:
+    Function:
+      Environment:
+          Variables:
+              HAT_SECRET: !Ref HatSecret
 
 Parameters:
     RootDomainName:
         Description: The domain name for the website
+        Type: String
+    HatSecret:
+        Description: The secret used for encrypting hats
         Type: String
 
 Resources:

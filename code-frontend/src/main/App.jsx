@@ -3,10 +3,11 @@
 const regeneratorRuntime = require("regenerator-runtime");
 const React = require('react');
 const ReactDOM = require('react-dom');
+//TODO: change to use react-bootstrap
 const bootstrap = require('bootstrap');
 const css = require('./App.scss');
 const boostrapCss = require('bootstrap/dist/css/bootstrap.min.css');
-const config = require('config.json');
+const config = require('config/config.json');
 
 class App extends React.Component {
     constructor(props) {

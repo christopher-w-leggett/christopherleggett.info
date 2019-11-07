@@ -78,9 +78,14 @@ module.exports = {
             const buildDir = await properties.read('backend-build-dir', false);
             const stackName = await properties.read('stack-name', true);
             const profile = await properties.read('profile', true);
+            const domain = await properties.read('stack-root-domain-name', true);
+            const hatSecret = await properties.read('stack-hat-secret', true);
 
             //construct deploy command
             let deployCmdString = `aws cloudformation deploy --template-file ${buildDir}/output-template.yaml --stack-name ${stackName} --capabilities CAPABILITY_IAM`;
+            if (properties) {
+                deployCmdString += ` --parameter-overrides RootDomainName=${domain} HatSecret=${hatSecret}`;
+            }
             if (profile) {
                 deployCmdString += ` --profile ${profile}`;
             }

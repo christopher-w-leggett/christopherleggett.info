@@ -83,7 +83,17 @@ const PROPERTY_DEFINITIONS = {
             'required': true
         }
     },
-    'frontend-config': {
+    'frontend-config-src-file': {
+        'validation': {
+            'required': true
+        }
+    },
+    'frontend-config-dst-file': {
+        'validation': {
+            'required': true
+        }
+    },
+    'frontend-module-dirs': {
         'validation': {
             'required': true
         }
@@ -119,6 +129,42 @@ const PROPERTY_DEFINITIONS = {
                     return true;
                 } else {
                     return 'Invalid AWS CLI profile provided.';
+                }
+            }
+        }
+    },
+    'stack-root-domain-name': {
+        'validation': {
+            'required': true,
+            'regex': /(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]/
+        },
+        'prompt': {
+            'type': 'input',
+            'name': 'stack-root-domain-name',
+            'message': 'Please provide a valid root domain name:',
+            'validate': (input) => {
+                if (validator.valid(input, PROPERTY_DEFINITIONS['stack-root-domain-name'].validation)) {
+                    return true;
+                } else {
+                    return 'Invalid root domain name provided.';
+                }
+            }
+        }
+    },
+    'stack-hat-secret': {
+        'validation': {
+            'required': true,
+            'regex': /^[a-zA-Z0-9\-]+$/
+        },
+        'prompt': {
+            'type': 'input',
+            'name': 'stack-hat-secret',
+            'message': 'Please provide a valid hat secret:',
+            'validate': (input) => {
+                if (validator.valid(input, PROPERTY_DEFINITIONS['stack-hat-secret'].validation)) {
+                    return true;
+                } else {
+                    return 'Invalid hat secret provided.';
                 }
             }
         }

@@ -9,4 +9,4 @@ node_modules
 
 # Project Specific Ignore
 temp
-gulp/properties-*.json
+code-frontend/src/main/config/config.json

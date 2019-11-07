@@ -3,6 +3,7 @@
 module.exports.pickName = async (event, context, callback) => {
     try {
         //grab payload
+        const hatSecret = process.env.HAT_SECRET;
         const hatPayload = {
             hatOwnerId: 2,
             participants: [
@@ -83,7 +84,7 @@ module.exports.pickName = async (event, context, callback) => {
             'statusCode': 200,
             'body': JSON.stringify({
                 selection: selection.name,
-                hat: nextHatUrl || 'test'
+                hat: nextHatUrl || process.env.HAT_SECRET
             })
         };
     } catch (err) {

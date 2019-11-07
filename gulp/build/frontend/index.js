@@ -5,7 +5,7 @@ const del = require('del');
 const gulp = require('gulp');
 const webpack = require('webpack');
 const gulpWebpack = require('webpack-stream');
-const fs = require('fs');
+const rename = require("gulp-rename");
 const path = require('path');
 const buildWebpackConfig = require('../../../webpack.config.js');
 const util = require('util');
@@ -24,29 +24,22 @@ module.exports = {
     registerTasks: () => {
         gulp.task(taskNames.clean, async () => {
             const buildDir = await properties.read('frontend-build-dir', false);
-            return del([buildDir, path.resolve(__dirname, '../../../temp/modules')]);
+            const frontendConfigDstFile = await properties.read('frontend-config-dst-file', false);
+
+            return del([buildDir, path.resolve(__dirname, `../../../${frontendConfigDstFile}`)]);
         });
 
         gulp.task(taskNames.config, gulp.series(taskNames.clean, async () => {
-            const frontendConfig = await properties.read('frontend-config', false);
+            const frontendConfigSrcFile = await properties.read('frontend-config-src-file', false);
+            const frontendConfigDstFile = await properties.read('frontend-config-dst-file', false);
+            const frontendConfigDstFileNameIndex = frontendConfigDstFile.lastIndexOf('/');
 
-            return new Promise(async function(resolve, reject) {
-                    await new Promise(function(resolve, reject) {
-                        fs.mkdir(`${path.resolve(__dirname, '../../../temp/modules/config')}`, { recursive: true }, (error) => {
-                            if(error) {
-                                reject(error);
-                            } else {
-                                resolve();
-                            }
-                        });
-                    });
-                    fs.writeFile(`${path.resolve(__dirname, '../../../temp/modules/config.json')}`, frontendConfig, 'utf8', (error) => {
-                        if(error) {
-                            reject(error);
-                        } else {
-                            resolve();
-                        }
-                    });
+            return new Promise(function(resolve, reject) {
+                gulp.src(frontendConfigSrcFile)
+                    .pipe(rename(frontendConfigDstFile.substring(frontendConfigDstFileNameIndex)))
+                    .on('error', reject)
+                    .pipe(gulp.dest(frontendConfigDstFile.substring(0, frontendConfigDstFileNameIndex)))
+                    .on('end', resolve);
             });
         }));
 

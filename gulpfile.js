@@ -22,42 +22,15 @@ gulp.task('run', gulp.series(backend.taskNames.package, frontend.taskNames.build
     const frontendBuildDir = await properties.read('frontend-build-dir', false);
     const frontendContentFiles = await properties.read('frontend-content-watch-files', false);
     const frontendCodeFiles = await properties.read('frontend-code-files', false);
+    const hatSecret = await properties.read('stack-hat-secret', true);
 
     //start sam
-    const startCmdString = `sam local start-api -t template.yaml -s ${frontendBuildDir} > "temp/sam.log" 2>&1`;
+    const startCmdString = `HAT_SECRET=${hatSecret} sam local start-api -t template.yaml -s ${frontendBuildDir} > "temp/sam.log" 2>&1`;
     const startCmd = exec(startCmdString);
 
     //watch backend files
-    let backendWatchTimeout = null,
-        backendBuildRunning = false,
-        backendWatcher = gulp.watch(backendFiles, (event) => {
-            //only queue up at most 1 build.
-            if (!backendWatchTimeout || backendBuildRunning) {
-                backendWatchTimeout = setTimeout(() => {
-                    backendBuildRunning = true;
-                    //TODO: Fix gulp.start
-                    gulp.start(backend.taskNames.package, () => {
-                        backendWatchTimeout = null;
-                        backendBuildRunning = false;
-                    });
-                }, 2000);
-            }
-        });
+    gulp.watch(backendFiles, {delay: 2000}, gulp.series(backend.taskNames.package));
 
-    //watch frontend files TODO: Add code files to watch
-    let frontendWatchTimeout = null,
-        frontendBuildRunning = false,
-        frontendWatcher = gulp.watch([...frontendContentFiles, ...frontendCodeFiles], (event) => {
-            //only queue up at most 1 build.
-            if (!frontendWatchTimeout || frontendBuildRunning) {
-                frontendWatchTimeout = setTimeout(() => {
-                    frontendBuildRunning = true;
-                    //TODO: Fix gulp.start
-                    gulp.start(frontend.taskNames.build, () => {
-                        frontendWatchTimeout = null;
-                        frontendBuildRunning = false;
-                    });
-                }, 2000);
-            }
-        });
+    //watch frontend files
+    gulp.watch([...frontendContentFiles, ...frontendCodeFiles], {delay: 2000}, gulp.series(frontend.taskNames.build));
 }));

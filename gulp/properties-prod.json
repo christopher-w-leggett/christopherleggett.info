@@ -13,7 +13,9 @@
     "frontend-code-entry-file": "code-frontend/src/main/App.jsx",
     "frontend-code-build-dir": "js",
     "frontend-styles-build-dir": "css",
-    "frontend-config": "{\"host\":\"http://localhost:3000\"}",
+    "frontend-config-src-file": "code-frontend/src/main/config/config-prod.json",
+    "frontend-config-dst-file": "code-frontend/src/main/config/config.json",
+    "frontend-module-dirs": ["code-frontend/src/main"],
     "profile": "admin",
     "stack-name": "christopherleggett-info-stack"
 }

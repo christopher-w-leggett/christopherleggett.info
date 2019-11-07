@@ -12,6 +12,7 @@ module.exports = async () => {
     const codeBuildDir = await properties.read('frontend-code-build-dir', false);
     const stylesBuildDir = await properties.read('frontend-styles-build-dir', false);
     const contentRootDir = await properties.read('frontend-content-root-dir', false);
+    const modulesDirs = await properties.read('frontend-module-dirs', false);
 
     //build content files for html generation.
     const contentPlugins = glob.sync(
@@ -73,8 +74,8 @@ module.exports = async () => {
         },
         resolve: {
             modules: [
-                'node_modules',
-                path.resolve(__dirname, 'temp/modules')
+                ...modulesDirs.map((moduleDir) => path.resolve(__dirname, moduleDir)),
+                'node_modules'
             ]
         },
         // optimization: {
