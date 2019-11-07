@@ -15,11 +15,9 @@ backend.registerTasks();
 frontend.registerTasks();
 
 //register global tasks
-gulp.task('deploy', [backend.taskNames.deploy, frontend.taskNames.deploy], async () => {
+gulp.task('deploy', gulp.series(backend.taskNames.deploy, frontend.taskNames.deploy));
 
-});
-
-gulp.task('run', [backend.taskNames.package, frontend.taskNames.build], async () => {
+gulp.task('run', gulp.series(backend.taskNames.package, frontend.taskNames.build, async () => {
     const backendFiles = await properties.read('backend-files', false);
     const frontendBuildDir = await properties.read('frontend-build-dir', false);
     const frontendContentFiles = await properties.read('frontend-content-watch-files', false);
@@ -37,6 +35,7 @@ gulp.task('run', [backend.taskNames.package, frontend.taskNames.build], async ()
             if (!backendWatchTimeout || backendBuildRunning) {
                 backendWatchTimeout = setTimeout(() => {
                     backendBuildRunning = true;
+                    //TODO: Fix gulp.start
                     gulp.start(backend.taskNames.package, () => {
                         backendWatchTimeout = null;
                         backendBuildRunning = false;
@@ -53,6 +52,7 @@ gulp.task('run', [backend.taskNames.package, frontend.taskNames.build], async ()
             if (!frontendWatchTimeout || frontendBuildRunning) {
                 frontendWatchTimeout = setTimeout(() => {
                     frontendBuildRunning = true;
+                    //TODO: Fix gulp.start
                     gulp.start(frontend.taskNames.build, () => {
                         frontendWatchTimeout = null;
                         frontendBuildRunning = false;
@@ -60,4 +60,4 @@ gulp.task('run', [backend.taskNames.package, frontend.taskNames.build], async ()
                 }, 2000);
             }
         });
-});
+}));

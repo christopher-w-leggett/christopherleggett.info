@@ -13,6 +13,7 @@
     "frontend-code-entry-file": "code-frontend/src/main/App.jsx",
     "frontend-code-build-dir": "js",
     "frontend-styles-build-dir": "css",
+    "frontend-config": "{\"host\":\"http://localhost:3000\"}",
     "profile": "admin",
     "stack-name": "christopherleggett-info-stack"
 }

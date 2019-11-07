@@ -21,12 +21,12 @@ const taskNames = {
 module.exports = {
     taskNames: taskNames,
     registerTasks: () => {
-        gulp.task(taskNames.clean, async () => {
+        gulp.task(taskNames.clean, gulp.series(async () => {
             const buildDir = await properties.read('backend-build-dir', false);
             return del([buildDir]);
-        });
+        }));
 
-        gulp.task(taskNames.build, [taskNames.clean], async () => {
+        gulp.task(taskNames.build, gulp.series(taskNames.clean, async () => {
             const buildDir = await properties.read('backend-build-dir', false);
             const archiveFiles = await properties.read('backend-files', false);
             const archiveName = await properties.read('backend-archive-name', true);
@@ -38,9 +38,9 @@ module.exports = {
                     npm: '--only=production'
                 }))
                 .pipe(sink.object());
-        });
+        }));
 
-        gulp.task(taskNames.package, [taskNames.build], async () => {
+        gulp.task(taskNames.package, gulp.series(taskNames.build, async () => {
             const buildDir = await properties.read('backend-build-dir', false);
             const archiveName = await properties.read('backend-archive-name', true);
 
@@ -49,9 +49,9 @@ module.exports = {
                 ])
                 .pipe(zip(`${archiveName}.zip`))
                 .pipe(gulp.dest(buildDir));
-        });
+        }));
 
-        gulp.task(taskNames.upload, [taskNames.package], async () => {
+        gulp.task(taskNames.upload, gulp.series(taskNames.package, async () => {
             //read properties
             const buildDir = await properties.read('backend-build-dir', false);
             const s3Bucket = await properties.read('backend-s3-bucket', true);
@@ -71,9 +71,9 @@ module.exports = {
                 //do nothing
             });
             return uploadCmd;
-        });
+        }));
 
-        gulp.task(taskNames.deploy, [taskNames.upload], async () => {
+        gulp.task(taskNames.deploy, gulp.series(taskNames.upload, async () => {
             //ensure required properties
             const buildDir = await properties.read('backend-build-dir', false);
             const stackName = await properties.read('stack-name', true);
@@ -93,6 +93,6 @@ module.exports = {
                 //do nothing
             });
             return deployCmd;
-        });
+        }));
     }
 };

@@ -83,6 +83,11 @@ const PROPERTY_DEFINITIONS = {
             'required': true
         }
     },
+    'frontend-config': {
+        'validation': {
+            'required': true
+        }
+    },
     'stack-name': {
         'validation': {
             'required': true,

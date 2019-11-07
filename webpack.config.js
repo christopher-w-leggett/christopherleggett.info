@@ -71,6 +71,12 @@ module.exports = async () => {
                 }
             ]
         },
+        resolve: {
+            modules: [
+                'node_modules',
+                path.resolve(__dirname, 'temp/modules')
+            ]
+        },
         // optimization: {
         //     splitChunks: {
         //         cacheGroups: {

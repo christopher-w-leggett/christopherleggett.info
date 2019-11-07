@@ -6,6 +6,7 @@ const ReactDOM = require('react-dom');
 const bootstrap = require('bootstrap');
 const css = require('./App.scss');
 const boostrapCss = require('bootstrap/dist/css/bootstrap.min.css');
+const config = require('config.json');
 
 class App extends React.Component {
     constructor(props) {
@@ -45,7 +46,7 @@ class App extends React.Component {
                 selection: '',
                 hat: ''
             });
-            const response = await fetch('http://localhost:3000/pick-name', {
+            const response = await fetch(config.host + '/pick-name', {
                 method: 'POST',
                 mode: 'cors',
                 cache: 'no-cache',
@@ -75,7 +76,7 @@ class App extends React.Component {
             this.setState({
                 name: ''
             });
-            const response = await fetch('http://localhost:3000/reveal-name', {
+            const response = await fetch(config.host + '/reveal-name', {
                 method: 'POST',
                 mode: 'cors',
                 cache: 'no-cache',
@@ -126,6 +127,9 @@ class App extends React.Component {
                                     <h2>Pick a name</h2>
                                     <div className="form-group">
                                         <input type="text" className="form-control" aria-label="Hat" placeholder="Enter Hat (e.g. eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE1MTYyMzkwMjJ9.tbDepxpstvGdW8TC3G8zg4B6rUYAOvfzdceoH48wgRQ)" name="hat-token" required pattern="^[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$"/>
+                                        <small className="form-text text-muted">
+                                            This hat is unique to you and should not be shared with other secret santa participants.
+                                        </small>
                                         <div className="invalid-feedback">
                                             Please enter a valid hat to pick a name.
                                         </div>

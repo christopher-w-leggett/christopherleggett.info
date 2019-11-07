@@ -27,7 +27,7 @@
     "css-loader": "^1.0.1",
     "del": "^3.0.0",
     "glob": "^7.1.5",
-    "gulp": "^3.9.1",
+    "gulp": "^4.0.2",
     "gulp-install": "^1.1.0",
     "gulp-zip": "^4.2.0",
     "handlebars": "^4.5.1",
