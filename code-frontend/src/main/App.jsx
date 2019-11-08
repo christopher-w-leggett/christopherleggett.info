@@ -55,7 +55,7 @@ class App extends React.Component {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(this.toJSONString(form))
+                body: this.toJSONString(form)
             });
             const json = await response.json();
             this.setState({
@@ -85,7 +85,7 @@ class App extends React.Component {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(this.toJSONString(form))
+                body: this.toJSONString(form)
             });
             const json = await response.json();
             this.setState({
@@ -127,7 +127,7 @@ class App extends React.Component {
                                 <div className="col mb-3">
                                     <h2>Pick a name</h2>
                                     <div className="form-group">
-                                        <input type="text" className="form-control" aria-label="Hat" placeholder="Enter Hat (e.g. eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE1MTYyMzkwMjJ9.tbDepxpstvGdW8TC3G8zg4B6rUYAOvfzdceoH48wgRQ)" name="hat-token" required pattern="^[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$"/>
+                                        <input type="text" className="form-control" aria-label="Hat" placeholder="Enter Hat (e.g. eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE1MTYyMzkwMjJ9.tbDepxpstvGdW8TC3G8zg4B6rUYAOvfzdceoH48wgRQ)" name="hattoken" required pattern="^[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$"/>
                                         <small className="form-text text-muted">
                                             This hat is unique to you and should not be shared with other secret santa participants.
                                         </small>
@@ -136,7 +136,7 @@ class App extends React.Component {
                                         </div>
                                     </div>
                                     <div className="form-group">
-                                        <select className="custom-select" name="user-name" required>
+                                        <select className="custom-select" name="username" required>
                                             <option value="">Select Your Name</option>
                                             <option value="stacy">Stacy</option>
                                             <option value="chris">Chris</option>
@@ -158,7 +158,7 @@ class App extends React.Component {
                                 <div className="col mb-3">
                                     <h2>Reveal your name</h2>
                                     <div className="form-group">
-                                        <input type="text" className="form-control" aria-label="Selection" placeholder="Enter Selection (e.g. eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE1MTYyMzkwMjJ9.tbDepxpstvGdW8TC3G8zg4B6rUYAOvfzdceoH48wgRQ)" name="selection-token" required pattern="^[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$"/>
+                                        <input type="text" className="form-control" aria-label="Selection" placeholder="Enter Selection (e.g. eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE1MTYyMzkwMjJ9.tbDepxpstvGdW8TC3G8zg4B6rUYAOvfzdceoH48wgRQ)" name="selectiontoken" required pattern="^[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$"/>
                                         <div className="invalid-feedback">
                                             Please enter a valid selection to reveal your name.
                                         </div>
