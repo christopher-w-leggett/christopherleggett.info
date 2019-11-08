@@ -49,7 +49,7 @@ module.exports.pickName = async (event, context, callback) => {
         const hatToken = data.hattoken;
         //TODO: read password from json post data
         const selectionPassword = 'test';
-        const hatPayload = await jwe.readJWE(hatToken);
+        const hatPayload = await jwe.readJWE(hatToken, hatSecret);
 
         //grab hat owner details
         const hatOwner = hatPayload.participants.filter((participant) => {
@@ -81,7 +81,7 @@ module.exports.pickName = async (event, context, callback) => {
         const selectionPayload = {
             name: selection.name
         };
-        const selectionToken = await jwe.createJWE(selectionPayload);
+        const selectionToken = await jwe.createJWE(selectionPayload, selectionPassword);
         //TODO: generate selection URL
         //TODO: SMS selection URL to hatOwner.sms
 
@@ -113,7 +113,7 @@ module.exports.pickName = async (event, context, callback) => {
                     return newParticipant;
                 })
             };
-            nextHatToken = await jwe.createJWE(nextHatPayload);
+            nextHatToken = await jwe.createJWE(nextHatPayload, hatSecret);
             //TODO: generate hat URL
             //TODO: SMS hat URL to nextToSelect.sms
         }

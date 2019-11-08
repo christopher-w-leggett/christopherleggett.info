@@ -2,13 +2,11 @@
 
 const jose = require('node-jose');
 
-const hatSecret = process.env.HAT_SECRET;
-
-async function createKey() {
+async function createKey(secret) {
     return await new Promise((resolve, reject) => {
         jose.JWK.asKey({
             'kty': 'oct',
-            'k': hatSecret
+            'k': secret
         }).then((result) => {
             resolve(result);
         }).catch((error) => {
@@ -18,8 +16,8 @@ async function createKey() {
 }
 
 module.exports = {
-    createJWE: async function(payload) {
-        const key = await createKey();
+    createJWE: async function(payload, secret) {
+        const key = await createKey(secret);
 
         return await new Promise((resolve, reject) => {
             jose.JWE.createEncrypt({format: 'compact'}, key).update(JSON.stringify(payload)).final().then((result) => {
@@ -29,8 +27,8 @@ module.exports = {
                 });
         });
     },
-    readJWE: async function(jwe) {
-        const key = await createKey();
+    readJWE: async function(jwe, secret) {
+        const key = await createKey(secret);
 
         return await new Promise((resolve, reject) => {
             jose.JWE.createDecrypt(key).decrypt(jwe).then((result) => {
