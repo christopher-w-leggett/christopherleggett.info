@@ -1,6 +1,7 @@
 'use strict'
 
 const jwe = require('./lib/jwe/index.js');
+const AWS = require("aws-sdk");
 
 function readData(event) {
     try {
@@ -10,37 +11,30 @@ function readData(event) {
     }
 }
 
-/*
-        const hatPayload = {
-            hatOwnerId: 2,
-            participants: [
-                {
-                    id: 1,
-                    name: 'Chris',
-                    sms: '555-555-5555',
-                    hasBeenSelected: false,
-                    hasSelectedName: false
-                },
-                {
-                    id: 2,
-                    name: 'Stacy',
-                    sms: '555-555-2222',
-                    hasBeenSelected: false,
-                    hasSelectedName: false
-                },
-                {
-                    id: 3,
-                    name: 'Karen',
-                    sms: '555-555-3333',
-                    hasBeenSelected: false,
-                    hasSelectedName: false
-                }
-            ]
+module.exports.initialize = async (event, context) => {
+    try {
+        //grab payload TODO: Adjust so it only accepts participants
+        const data = readData(event);
+        const hatSecret = process.env.HAT_SECRET;
+        //TODO: randomly select first to get the hat.
+
+        //encrypt payload
+        const hatToken = await jwe.createJWE(data, hatSecret);
+        //TODO: create hat url and send to first participant
+
+        return {
+            'statusCode': 200,
+            'body': JSON.stringify({
+                hat: hatToken
+            })
         };
+    } catch (err) {
+        console.error(err);
+        throw err;
+    }
+};
 
-*/
-
-module.exports.pickName = async (event, context, callback) => {
+module.exports.pickName = async (event, context) => {
     try {
         //grab payload
         const data = readData(event);
@@ -114,13 +108,33 @@ module.exports.pickName = async (event, context, callback) => {
                 })
             };
             nextHatToken = await jwe.createJWE(nextHatPayload, hatSecret);
-            //TODO: generate hat URL
-            //TODO: SMS hat URL to nextToSelect.sms
+            const nextHatUrl = `https://${process.env.ROOT_DOMAIN_NAME}/index.html?hat=${nextHatToken}`;
+
+            //send SMS
+            const sns = new AWS.SNS();
+            const params = {
+                Message: nextHatUrl,
+                MessageStructure: 'string',
+                PhoneNumber: nextToSelect.sms
+            };
+            await new Promise((resolve, reject) => {
+                sns.publish(params, (error, data) => {
+                    if(error) {
+                        reject(error);
+                    } else {
+                        console.log(JSON.stringify(data));
+                        resolve(data);
+                    }
+                });
+            });
         }
 
         //TODO: don't return hat
         return {
             'statusCode': 200,
+            'headers': {
+                'Access-Control-Allow-Origin': `https://${process.env.ROOT_DOMAIN_NAME}`
+            },
             'body': JSON.stringify({
                 selection: (selection.name + (nextToSelect ? ' - ' + nextToSelect.name : '')),
                 hat: nextHatToken || 'All Done'
@@ -132,7 +146,7 @@ module.exports.pickName = async (event, context, callback) => {
     }
 };
 
-module.exports.revealName = async (event, context, callback) => {
+module.exports.revealName = async (event, context) => {
     try {
         //grab payload & selection password
         const selectionPayload = {
@@ -144,6 +158,9 @@ module.exports.revealName = async (event, context, callback) => {
         //TODO: return name
         return {
             'statusCode': 200,
+            'headers': {
+                'Access-Control-Allow-Origin': `https://${process.env.ROOT_DOMAIN_NAME}`
+            },
             'body': JSON.stringify({
                 name: selectionPayload.name
             })

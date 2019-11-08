@@ -6,7 +6,15 @@ Globals:
     Function:
       Environment:
           Variables:
+              ROOT_DOMAIN_NAME: !Ref RootDomainName
               HAT_SECRET: !Ref HatSecret
+    Api:
+        Cors:
+            AllowMethods: "'GET,POST'"
+            AllowHeaders: "'accept,authorization,content-type'"
+            AllowOrigin: !Sub
+                - "'https://${Domain}'"
+                - Domain: !Ref RootDomainName
 
 Parameters:
     RootDomainName:
@@ -163,13 +171,55 @@ Resources:
                           CanonicalUser: !GetAtt CDNAccessIdentity.S3CanonicalUserId
             Bucket: !Ref FrontendRootBucket
 
+    #Lambda Execution Role
+    BackendLambdaExecutionRole:
+        Type: AWS::IAM::Role
+        Properties:
+            AssumeRolePolicyDocument:
+                Version: 2012-10-17
+                Statement:
+                    - Effect: Allow
+                      Principal:
+                          Service:
+                              - lambda.amazonaws.com
+                      Action:
+                          - sts:AssumeRole
+            Path: /
+            Policies:
+                - PolicyName: root
+                  PolicyDocument:
+                      Version: '2012-10-17'
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                                - logs:*
+                            Resource: arn:aws:logs:*:*:*
+                          - Effect: Allow
+                            Action:
+                                - sns:Publish
+                            Resource: "*"
+
     #Backend Lambdas
+    InitializeSecretSanta:
+        Type: AWS::Serverless::Function
+        Properties:
+            CodeUri: temp/build/code-backend/christopherleggett.info.zip
+            Handler: index.initialize
+            Runtime: nodejs10.x
+            Role: !GetAtt BackendLambdaExecutionRole.Arn
+            Events:
+                HelloWorldGET:
+                    Type: Api
+                    Properties:
+                        Path: /initialize
+                        Method: post
     PickName:
         Type: AWS::Serverless::Function
         Properties:
             CodeUri: temp/build/code-backend/christopherleggett.info.zip
             Handler: index.pickName
             Runtime: nodejs10.x
+            Role: !GetAtt BackendLambdaExecutionRole.Arn
             Events:
                 HelloWorldGET:
                     Type: Api
