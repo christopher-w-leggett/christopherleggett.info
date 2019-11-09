@@ -7,8 +7,10 @@ Globals:
       Environment:
           Variables:
               ROOT_DOMAIN_NAME: !Ref RootDomainName
-              HAT_SECRET: !Ref HatSecret
               ENABLE_SMS: !Ref EnableSMS
+              HAT_SECRET: !Ref HatSecret
+              SECRETSANTA_ADMIN_USER: !Ref SecretSantaAdminUser
+              SECRETSANTA_ADMIN_PASS: !Ref SecretSantaAdminPass
     Api:
         Cors:
             AllowMethods: "'GET,POST'"
@@ -21,13 +23,19 @@ Parameters:
     RootDomainName:
         Description: The domain name for the website
         Type: String
-    HatSecret:
-        Description: The secret used for encrypting hats
-        Type: String
     EnableSMS:
         Description: Whether SMS should be enabled or not (true|false)
         Type: String
         Default: false
+    HatSecret:
+        Description: The secret used for encrypting hats
+        Type: String
+    SecretSantaAdminUser:
+        Description: The user that can initialize secret santa hats
+        Type: String
+    SecretSantaAdminPass:
+        Description: The password of the user that can initialize secret santa hats
+        Type: String
 
 Resources:
     DNS:
@@ -176,8 +184,8 @@ Resources:
                           CanonicalUser: !GetAtt CDNAccessIdentity.S3CanonicalUserId
             Bucket: !Ref FrontendRootBucket
 
-    #Lambda Execution Role
-    BackendLambdaExecutionRole:
+    #Secret Santa Lambda Execution Role
+    SecretSantaLambdaExecutionRole:
         Type: AWS::IAM::Role
         Properties:
             AssumeRolePolicyDocument:
@@ -204,44 +212,45 @@ Resources:
                                 - sns:Publish
                             Resource: "*"
 
-    #Backend Lambdas
-    InitializeSecretSanta:
+    #Secret Santa Lambdas
+    SecretSantaInitialize:
         Type: AWS::Serverless::Function
         Properties:
             CodeUri: temp/build/code-backend/christopherleggett.info.zip
-            Handler: index.initialize
+            Handler: secretsanta/api/handlers/initialize/index.handler
             Runtime: nodejs10.x
-            Role: !GetAtt BackendLambdaExecutionRole.Arn
+            Role: !GetAtt SecretSantaLambdaExecutionRole.Arn
             Events:
                 HelloWorldGET:
                     Type: Api
                     Properties:
-                        Path: /initialize
+                        Path: /secretsanta/initialize
                         Method: post
-    PickName:
+    SecretSantaPick:
         Type: AWS::Serverless::Function
         Properties:
             CodeUri: temp/build/code-backend/christopherleggett.info.zip
-            Handler: index.pickName
+            Handler: secretsanta/api/handlers/pick/index.handler
             Runtime: nodejs10.x
-            Role: !GetAtt BackendLambdaExecutionRole.Arn
+            Role: !GetAtt SecretSantaLambdaExecutionRole.Arn
             Events:
                 HelloWorldGET:
                     Type: Api
                     Properties:
-                        Path: /pick-name
+                        Path: /secretsanta/pick
                         Method: post
-    RevealName:
+    SecretSantaReveal:
         Type: AWS::Serverless::Function
         Properties:
             CodeUri: temp/build/code-backend/christopherleggett.info.zip
-            Handler: index.revealName
+            Handler: secretsanta/api/handlers/reveal/index.handler
             Runtime: nodejs10.x
+            Role: !GetAtt SecretSantaLambdaExecutionRole.Arn
             Events:
                 HelloWorldGET:
                     Type: Api
                     Properties:
-                        Path: /reveal-name
+                        Path: /secretsanta/reveal
                         Method: post
 
 Outputs:

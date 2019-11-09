@@ -168,6 +168,40 @@ const PROPERTY_DEFINITIONS = {
                 }
             }
         }
+    },
+    'secretsanta-admin-user': {
+        'validation': {
+            'required': true
+        },
+        'prompt': {
+            'type': 'input',
+            'name': 'secretsanta-admin-user',
+            'message': 'Please provide a username for the secret santa admin:',
+            'validate': (input) => {
+                if (validator.valid(input, PROPERTY_DEFINITIONS['secretsanta-admin-user'].validation)) {
+                    return true;
+                } else {
+                    return 'No username provided.';
+                }
+            }
+        }
+    },
+    'secretsanta-admin-pass': {
+        'validation': {
+            'required': true
+        },
+        'prompt': {
+            'type': 'input',
+            'name': 'secretsanta-admin-pass',
+            'message': 'Please provide a password for the secret santa admin:',
+            'validate': (input) => {
+                if (validator.valid(input, PROPERTY_DEFINITIONS['secretsanta-admin-pass'].validation)) {
+                    return true;
+                } else {
+                    return 'No password provided.';
+                }
+            }
+        }
     }
 };
 

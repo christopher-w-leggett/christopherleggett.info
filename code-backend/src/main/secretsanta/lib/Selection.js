@@ -1,6 +1,6 @@
 'use strict';
 
-const jwe = require('../lib/jwe');
+const jwe = require('../../lib/jwe');
 
 module.exports = class Selection {
     constructor(name) {

@@ -81,12 +81,13 @@ module.exports = {
             const profile = await properties.read('profile', true);
             const domain = await properties.read('stack-root-domain-name', true);
             const hatSecret = await properties.read('stack-hat-secret', true);
+            const secretSantaAdminUser = await properties.read('secretsanta-admin-user', true);
+            const secretSantaAdminPass = await properties.read('secretsanta-admin-pass', true);
 
             //construct deploy command
             let deployCmdString = `aws cloudformation deploy --template-file ${buildDir}/output-template.yaml --stack-name ${stackName} --capabilities CAPABILITY_IAM`;
-            if (domain && hatSecret) {
-                deployCmdString += ` --parameter-overrides RootDomainName=${domain} HatSecret=${hatSecret} EnableSMS=true`;
-            }
+            deployCmdString += ` --parameter-overrides RootDomainName=${domain} HatSecret=${hatSecret} EnableSMS=true SecretSantaAdminUser=${secretSantaAdminUser} SecretSantaAdminPass=${secretSantaAdminPass}`;
+
             if (profile) {
                 deployCmdString += ` --profile ${profile}`;
             }

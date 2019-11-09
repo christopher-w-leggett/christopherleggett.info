@@ -1,6 +1,6 @@
 'use strict';
 
-const jwe = require('../lib/jwe');
+const jwe = require('../../lib/jwe');
 const Participant = require('./Participant.js');
 
 /*

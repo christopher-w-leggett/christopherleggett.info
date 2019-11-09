@@ -49,7 +49,7 @@ class App extends React.Component {
             this.setState({
                 name: ''
             });
-            const response = await fetch(config.host + '/pick-name', {
+            const response = await fetch(config.host + '/secretsanta/pick', {
                 method: 'POST',
                 mode: 'cors',
                 cache: 'no-cache',
@@ -78,7 +78,7 @@ class App extends React.Component {
             this.setState({
                 name: ''
             });
-            const response = await fetch(config.host + '/reveal-name', {
+            const response = await fetch(config.host + '/secretsanta/reveal', {
                 method: 'POST',
                 mode: 'cors',
                 cache: 'no-cache',
