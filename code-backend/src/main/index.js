@@ -26,14 +26,12 @@ module.exports.initialize = async (event, context) => {
 
         //encrypt payload
         const hatToken = await hat.encrypt(hatSecret);
-        //TODO: create hat url and send to first participant
+        const hatUrl = `https://${process.env.ROOT_DOMAIN_NAME}/index.html?hat=${hatToken}`;
+        await sms.send(hatUrl, hat.getOwner().getMobileNumber());
 
         return {
             'statusCode': 200,
-            'body': JSON.stringify({
-                hatJson: hat.toJson(),
-                hat: hatToken
-            })
+            'body': JSON.stringify({})
         };
     } catch (err) {
         console.error(err);
@@ -47,8 +45,7 @@ module.exports.pickName = async (event, context) => {
         const data = JSON.parse(event.body);
         const hatToken = data.hattoken;
         const hatSecret = process.env.HAT_SECRET;
-        //TODO: read password from json post data
-        const selectionPassword = 'test';
+        const selectionPassword = data.selectionpassword;
 
         //decrypt hat
         const hat = await secretSanta.Hat.decrypt(hatToken, hatSecret);
@@ -58,16 +55,16 @@ module.exports.pickName = async (event, context) => {
         const selection = new secretSanta.Selection(selectedParticipant.getName());
 
         //encrypt selection
-        const selectionToken = selection.encrypt(selectionPassword);
-        //TODO: generate selection URL
-        //TODO: SMS selection URL to hatOwner.sms
+        const selectionToken = await selection.encrypt(selectionPassword);
+        const selectionUrl = `https://${process.env.ROOT_DOMAIN_NAME}/index.html?selection=${selectionToken}`;
+        await sms.send(selectionUrl, hat.getOwner().getMobileNumber());
 
         //assign a new owner
         hat.assignNewOwner();
 
         //if another owner has been assigned, send the hat to the assigned owner
         let nextHatToken = '';
-        if(hat.getOwnerId() > -1) {
+        if(hat.getOwner()) {
             //encrypt payload
             nextHatToken = await hat.encrypt(hatSecret);
 
@@ -75,18 +72,16 @@ module.exports.pickName = async (event, context) => {
             const nextHatUrl = `https://${process.env.ROOT_DOMAIN_NAME}/index.html?hat=${nextHatToken}`;
 
             //send SMS
-            await sms.send(nextHatUrl, selectedParticipant.getMobileNumber());
+            await sms.send(nextHatUrl, hat.getOwner().getMobileNumber());
         }
 
-        //TODO: don't return hat
         return {
             'statusCode': 200,
             'headers': {
                 'Access-Control-Allow-Origin': `https://${process.env.ROOT_DOMAIN_NAME}`
             },
             'body': JSON.stringify({
-                selection: (selectedParticipant.getName() + ' - ' + hat.getOwnerId()),
-                hat: (nextHatToken || 'All Done') + ' - ' + JSON.stringify(hat.toJson())
+                name: selectedParticipant.getName()
             })
         };
     } catch (err) {
@@ -95,24 +90,23 @@ module.exports.pickName = async (event, context) => {
     }
 };
 
-//TODO: Implement
 module.exports.revealName = async (event, context) => {
     try {
-        //grab payload & selection password
-        const selectionPayload = {
-            name: 'Chris'
-        };
-        const selectionPassword = 'test';
-        //TODO: decrypt payload
+        //grab payload details
+        const data = JSON.parse(event.body);
+        const selectionToken = data.selectiontoken;
+        const selectionPassword = data.selectionpassword;
 
-        //TODO: return name
+        //decrypt selection
+        const selection = await secretSanta.Selection.decrypt(selectionToken, selectionPassword);
+
         return {
             'statusCode': 200,
             'headers': {
                 'Access-Control-Allow-Origin': `https://${process.env.ROOT_DOMAIN_NAME}`
             },
             'body': JSON.stringify({
-                name: selectionPayload.name
+                name: selection.getName()
             })
         };
     } catch (err) {

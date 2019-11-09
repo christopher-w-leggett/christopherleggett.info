@@ -111,8 +111,12 @@ module.exports = class Hat {
         this.participants.push(participant);
     }
 
-    getOwnerId() {
-        return this.ownerId;
+    getOwner() {
+        if(this.ownerId > -1) {
+            return this.participants[this.ownerId];
+        } else {
+            return null;
+        }
     }
 
     getParticipants() {

@@ -17,5 +17,6 @@
     "frontend-config-dst-file": "code-frontend/src/main/config/config.json",
     "frontend-module-dirs": ["code-frontend/src/main"],
     "profile": "admin",
-    "stack-name": "christopherleggett-info-stack"
+    "stack-name": "christopherleggett-info-stack",
+    "stack-root-domain-name": "localhost:3000"
 }
