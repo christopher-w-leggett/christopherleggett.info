@@ -51,7 +51,8 @@ module.exports = {
                 .pipe(gulp.dest(buildDir));
         }));
 
-        gulp.task(taskNames.upload, gulp.series(taskNames.package, async () => {
+        //TODO: Fix gulp task dependencies.  This should rely on taskNames.package
+        gulp.task(taskNames.upload, gulp.series(async () => {
             //read properties
             const buildDir = await properties.read('backend-build-dir', false);
             const s3Bucket = await properties.read('backend-s3-bucket', true);
@@ -83,8 +84,8 @@ module.exports = {
 
             //construct deploy command
             let deployCmdString = `aws cloudformation deploy --template-file ${buildDir}/output-template.yaml --stack-name ${stackName} --capabilities CAPABILITY_IAM`;
-            if (properties) {
-                deployCmdString += ` --parameter-overrides RootDomainName=${domain} HatSecret=${hatSecret}`;
+            if (domain && hatSecret) {
+                deployCmdString += ` --parameter-overrides RootDomainName=${domain} HatSecret=${hatSecret} EnableSMS=true`;
             }
             if (profile) {
                 deployCmdString += ` --profile ${profile}`;

@@ -80,9 +80,10 @@ module.exports = class Hat {
             //2 choices left, so we need to make sure we don't end up with an orphaned participant
             //if one of the participants has not selected and has not been selected, then they must be selected.
             const possibleOrphans = potentialSelections.filter((selectableParticipant) => {
-                return selectableParticipant.hasBeenSelected === false && selectableParticipant.hasSelectedName === false;
+                return selectableParticipant.wasSelected() === false && selectableParticipant.hasSelected() === false;
             });
             if(possibleOrphans.length === 1) {
+                console.log('Selected Orphan!');
                 selectedParticipant = possibleOrphans[0];
             }
         }

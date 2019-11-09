@@ -1,7 +1,7 @@
 'use strict'
 
-const jwe = require('./lib/jwe/index.js');
-const AWS = require('aws-sdk');
+const jwe = require('./lib/jwe');
+const sms = require('./lib/sms')
 const secretSanta = require('./secretsanta');
 
 //TODO: Basic Auth for initialize
@@ -74,23 +74,8 @@ module.exports.pickName = async (event, context) => {
             //construct hat url
             const nextHatUrl = `https://${process.env.ROOT_DOMAIN_NAME}/index.html?hat=${nextHatToken}`;
 
-            //send SMS TODO: Move to /lib (use factory so we can pass env variable to enable)
-            const sns = new AWS.SNS();
-            const params = {
-                Message: nextHatUrl,
-                MessageStructure: 'string',
-                PhoneNumber: selectedParticipant.getMobileNumber()
-            };
-            await new Promise((resolve, reject) => {
-                sns.publish(params, (error, data) => {
-                    if(error) {
-                        reject(error);
-                    } else {
-                        console.log(JSON.stringify(data));
-                        resolve(data);
-                    }
-                });
-            });
+            //send SMS
+            await sms.send(nextHatUrl, selectedParticipant.getMobileNumber());
         }
 
         //TODO: don't return hat

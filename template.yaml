@@ -8,6 +8,7 @@ Globals:
           Variables:
               ROOT_DOMAIN_NAME: !Ref RootDomainName
               HAT_SECRET: !Ref HatSecret
+              ENABLE_SMS: !Ref EnableSMS
     Api:
         Cors:
             AllowMethods: "'GET,POST'"
@@ -23,6 +24,10 @@ Parameters:
     HatSecret:
         Description: The secret used for encrypting hats
         Type: String
+    EnableSMS:
+        Description: Whether SMS should be enabled or not (true|false)
+        Type: String
+        Default: false
 
 Resources:
     DNS:
