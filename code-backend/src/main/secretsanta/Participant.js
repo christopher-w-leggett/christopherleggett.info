@@ -56,8 +56,16 @@ module.exports = class Participant {
         return this.selected;
     }
 
+    markWasSelected() {
+        this.selected = true;
+    }
+
     hasSelected() {
         return this.selectedParticipant;
+    }
+
+    markHasSelected() {
+        this.selectedParticipant = true;
     }
 
     getName() {
