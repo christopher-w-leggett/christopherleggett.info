@@ -9,7 +9,13 @@ module.exports = {
             const params = {
                 Message: message,
                 MessageStructure: 'string',
-                PhoneNumber: number
+                PhoneNumber: number,
+                MessageAttributes: {
+                    'AWS.SNS.SMS.SMSType': {
+                        StringValue: 'Transactional',
+                        DataType: 'String'
+                    }
+                }
             };
             await new Promise((resolve, reject) => {
                 sns.publish(params, (error, data) => {
