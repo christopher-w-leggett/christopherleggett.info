@@ -15,7 +15,8 @@
     "popper.js": "^1.16.0",
     "react": "^16.11.0",
     "react-dom": "^16.11.0",
-    "url-parse": "^1.4.7"
+    "url-parse": "^1.4.7",
+    "uuid": "^3.3.3"
   },
   "scripts": {
     "test": "mocha --use_strict code-backend/src/test/"

@@ -9,38 +9,23 @@
 }
 */
 module.exports = class Participant {
-    constructor() {
-        this.name = null;
-        this.mobileNumber = null;
-        this.selected = false;
-        this.selectedParticipant = false;
-    }
-
-    static newParticipant(name, mobileNumber) {
+    constructor(name, mobileNumber, selected, selectedParticipant) {
         if(!name || !mobileNumber) {
             throw new Error('Participant name and mobile number are required.');
         }
 
-        const participant = new Participant();
-        participant.name = name;
-        participant.mobileNumber = mobileNumber;
-        return participant;
+        this.name = name;
+        this.mobileNumber = mobileNumber;
+        this.selected = !!selected;
+        this.selectedParticipant = !!selectedParticipant;
     }
 
     static fromJson(json) {
         if(!json) {
             throw new Error('Participant json is required.')
         }
-        if(!json.name || !json.mobileNumber) {
-            throw new Error('Participant json must contain a name and mobile number.')
-        }
 
-        const participant = new Participant();
-        participant.name = json.name;
-        participant.mobileNumber = json.mobileNumber;
-        participant.selected = json.selected || false;
-        participant.selectedParticipant = json.selectedParticipant || false;
-        return participant;
+        return new Participant(json.name, json.mobileNumber, json.selected, json.selectedParticipant);
     }
 
     toJson() {
@@ -52,20 +37,11 @@ module.exports = class Participant {
         };
     }
 
-    wasSelected() {
-        return this.selected;
-    }
-
-    markWasSelected() {
-        this.selected = true;
-    }
-
-    hasSelected() {
-        return this.selectedParticipant;
-    }
-
-    markHasSelected() {
-        this.selectedParticipant = true;
+    isSameAs(participant) {
+        return participant.getName() === this.name
+            && participant.getMobileNumber() === this.mobileNumber
+            && participant.wasSelected() === this.selected
+            && participant.hasSelected() === this.selectedParticipant;
     }
 
     getName() {
@@ -74,5 +50,13 @@ module.exports = class Participant {
 
     getMobileNumber() {
         return this.mobileNumber;
+    }
+
+    wasSelected() {
+        return this.selected;
+    }
+
+    hasSelected() {
+        return this.selectedParticipant;
     }
 };

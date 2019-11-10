@@ -16,7 +16,6 @@ module.exports = {
                     if(error) {
                         reject(error);
                     } else {
-                        console.log(JSON.stringify(data));
                         resolve(data);
                     }
                 });

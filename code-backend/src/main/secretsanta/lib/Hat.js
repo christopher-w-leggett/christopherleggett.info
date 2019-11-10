@@ -1,5 +1,6 @@
 'use strict';
 
+const uuidv4 = require('uuid/v4');
 const jwe = require('../../lib/jwe');
 const Participant = require('./Participant.js');
 
@@ -10,9 +11,36 @@ const Participant = require('./Participant.js');
 }
 */
 module.exports = class Hat {
-    constructor() {
-        this.ownerId = -1;
-        this.participants = [];
+    constructor(participants) {
+        if(!participants || !participants.length) {
+            throw new Error('Hat must have participants.  Please provide participants to construct a new hat.');
+        }
+
+        this.hatId = uuidv4();
+        this.participants = participants.map((participant) => {
+            if(!participant) {
+                throw new Error('Participant is required.');
+            }
+            if(!(participant instanceof Participant)) {
+                throw new Error('Invalid participant provided.');
+            }
+
+            //not concerned about reusing participant because it is immutable.
+            return participant;
+        });
+
+        const potentialOwners = this.participants.reduce((acc, participant, index) => {
+            //subject to selecting next
+            if(participant.hasSelected() === false) {
+                acc.push(index);
+            }
+            return acc;
+        }, []);
+        if(potentialOwners.length) {
+            this.ownerId = potentialOwners[Math.floor(Math.random() * potentialOwners.length)];
+        } else {
+            throw new Error('All participants have selected.  At least one participant needs to make a selection to construct a new hat.');
+        }
     }
 
     static async decrypt(token, secret) {
@@ -21,11 +49,13 @@ module.exports = class Hat {
             throw new Error('Invalid token provided.');
         }
 
-        const hat = new Hat();
-        hat.ownerId = payload.ownerId;
-        hat.participants = payload.participants.map((participantJson) => {
+        const participants = payload.participants.map((participantJson) => {
             return Participant.fromJson(participantJson);
         });
+
+        const hat = new Hat(participants);
+        hat.hatId = payload.hatId;
+        hat.ownerId = payload.ownerId;
         return hat;
     }
 
@@ -35,6 +65,7 @@ module.exports = class Hat {
 
     toJson() {
         return {
+            hatId: this.hatId,
             ownerId: this.ownerId,
             participants: this.participants.map((participant, index) => {
                 return Object.assign({id: index}, participant.toJson());
@@ -42,32 +73,7 @@ module.exports = class Hat {
         }
     }
 
-    assignNewOwner() {
-        const potentialOwners = this.participants.reduce((acc, participant, index) => {
-            //subject to selecting next
-            if(participant.hasSelected() === false && this.ownerId !== index) {
-                acc.push(index);
-            }
-            return acc;
-        }, []);
-        if(potentialOwners.length) {
-            this.ownerId = potentialOwners[Math.floor(Math.random() * potentialOwners.length)];
-        } else {
-            this.ownerId = -1;
-        }
-    }
-
     pick() {
-        if(this.ownerId < 0) {
-            throw new Error('Hat must have an owner to pick a selection.  Please call assignNewOwner().');
-        }
-        if(!this.participants.length) {
-            throw new Error('Hat must have participants to pick.  Please add participants using addParticipant(participant).');
-        }
-        if(this.participants[this.ownerId].hasSelected()) {
-            throw new Error('Hat owner already selected.  Participants can only select once.')
-        }
-
         //create potential selections
         const potentialSelections = this.participants.filter((participant, index) => {
             //subject to selection if they have not been selected and are not holding the hat.
@@ -92,34 +98,19 @@ module.exports = class Hat {
             selectedParticipant = potentialSelections[Math.floor(Math.random() * potentialSelections.length)];
         }
 
-        //mark owner has selected and mark participant was selected
-        this.participants[this.ownerId].markHasSelected();
-        selectedParticipant.markWasSelected();
-
         //return selected participant
         return selectedParticipant;
     }
 
-    addParticipant(participant) {
-        if(!participant) {
-            throw new Error('Participant is required.');
-        }
-        if(!(participant instanceof Participant)) {
-            throw new Error('Invalid participant provided.');
-        }
-
-        this.participants.push(participant);
+    getHatId() {
+        return this.hatId;
     }
 
     getOwner() {
-        if(this.ownerId > -1) {
-            return this.participants[this.ownerId];
-        } else {
-            return null;
-        }
+        return this.participants[this.ownerId];
     }
 
     getParticipants() {
-        return this.participants;
+        return this.participants.slice();
     }
 };

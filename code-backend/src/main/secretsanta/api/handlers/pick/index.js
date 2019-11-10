@@ -2,6 +2,7 @@
 
 const sms = require('../../../../lib/sms');
 const Hat = require('../../../lib/Hat');
+const Participant = require('../../../lib/Participant');
 const Selection = require('../../../lib/Selection');
 
 module.exports.handler = async (event, context) => {
@@ -11,6 +12,14 @@ module.exports.handler = async (event, context) => {
         const hatToken = data.hattoken;
         const hatSecret = process.env.HAT_SECRET;
         const selectionPassword = data.selectionpassword;
+
+        //validate payload
+        if(!hatToken) {
+            throw new Error('A hat must be provided to pick from.');
+        }
+        if(!selectionPassword) {
+            throw new Error('A selection password is required to secure the selection.');
+        }
 
         //decrypt hat
         const hat = await Hat.decrypt(hatToken, hatSecret);
@@ -24,14 +33,29 @@ module.exports.handler = async (event, context) => {
         const selectionUrl = `https://${process.env.ROOT_DOMAIN_NAME}/index.html?selection=${selectionToken}`;
         await sms.send(selectionUrl, hat.getOwner().getMobileNumber());
 
-        //assign a new owner
-        hat.assignNewOwner();
+        //generate a new list of participants for our next hat.
+        let allSelected = true;
+        const participants = hat.getParticipants().map((participant) => {
+            //grab participant details
+            const name = participant.getName();
+            const mobileNumber = participant.getMobileNumber();
+            const wasSelected = participant.wasSelected() || participant.isSameAs(selectedParticipant);
+            const hasSelected = participant.hasSelected() || participant.isSameAs(hat.getOwner());
 
-        //if another owner has been assigned, send the hat to the assigned owner
-        let nextHatToken = '';
-        if(hat.getOwner()) {
+            //track if anybody still needs to select
+            allSelected = allSelected && hasSelected;
+
+            //return new participant
+            return new Participant(name, mobileNumber, wasSelected, hasSelected);
+        });
+
+        //if not everybody selected, send a new hat to the next participant
+        if(!allSelected) {
+            //create next hat
+            const nextHat = new Hat(participants);
+
             //encrypt payload
-            nextHatToken = await hat.encrypt(hatSecret);
+            const nextHatToken = await nextHat.encrypt(hatSecret);
 
             //construct hat url
             const nextHatUrl = `https://${process.env.ROOT_DOMAIN_NAME}/index.html?hat=${nextHatToken}`;

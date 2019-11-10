@@ -40,18 +40,19 @@ module.exports.handler = async (event, context) => {
         const data = JSON.parse(event.body);
         const hatSecret = process.env.HAT_SECRET;
 
-        //create hat
-        const hat = new Hat();
-
-        //add participants
-        if(data.participants && data.participants.length) {
-            data.participants.forEach((participant) => {
-                hat.addParticipant(Participant.fromJson(participant));
-            });
+        //validate payload
+        if(!data.participants || !data.participants.length) {
+            //TODO: Throw specific error
+            throw new Error('Invalid payload.  No participants provided.');
         }
 
-        //assign owner
-        hat.assignNewOwner();
+        //create participants
+        const participants = data.participants.map((participant) => {
+            return Participant.fromJson(participant);
+        });
+
+        //create hat
+        const hat = new Hat(participants);
 
         //encrypt payload
         const hatToken = await hat.encrypt(hatSecret);
