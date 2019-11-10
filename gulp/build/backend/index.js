@@ -86,7 +86,7 @@ module.exports = {
 
             //construct deploy command TODO: enable SMS when issue with texts not being sent is fixed.
             let deployCmdString = `aws cloudformation deploy --template-file ${buildDir}/output-template.yaml --stack-name ${stackName} --capabilities CAPABILITY_IAM`;
-            deployCmdString += ` --parameter-overrides RootDomainName=${domain} HatSecret=${hatSecret} EnableSMS=false EnableDynamoDB=true SecretSantaAdminUser=${secretSantaAdminUser} SecretSantaAdminPass=${secretSantaAdminPass}`;
+            deployCmdString += ` --parameter-overrides RootDomainName=${domain} HatSecret=${hatSecret} EnableSMS=false EnableDynamoDB=true SecretSantaAdminUser=${secretSantaAdminUser} SecretSantaAdminPass=${secretSantaAdminPass} SecretSantaRootUrl=https://${domain}`;
 
             if (profile) {
                 deployCmdString += ` --profile ${profile}`;

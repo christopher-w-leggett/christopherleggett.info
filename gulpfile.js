@@ -25,7 +25,7 @@ gulp.task('run', gulp.series(backend.taskNames.package, frontend.taskNames.build
     const hatSecret = await properties.read('stack-hat-secret', true);
 
     //start sam
-    const startCmdString = `HAT_SECRET=${hatSecret} SECRETSANTA_ADMIN_USER=test SECRETSANTA_ADMIN_PASS=test sam local start-api -t template.yaml -s ${frontendBuildDir} > "temp/sam.log" 2>&1`;
+    const startCmdString = `ROOT_DOMAIN_NAME=localhost:3000 HAT_SECRET=${hatSecret} SECRETSANTA_ADMIN_USER=test SECRETSANTA_ADMIN_PASS=test SECRETSANTA_ROOT_URL=http://localhost:3000 sam local start-api -t template.yaml -s ${frontendBuildDir} > "temp/sam.log" 2>&1`;
     const startCmd = exec(startCmdString);
 
     //watch backend files

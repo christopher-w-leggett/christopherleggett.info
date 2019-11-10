@@ -13,6 +13,7 @@ Globals:
               SECRETSANTA_ADMIN_USER: !Ref SecretSantaAdminUser
               SECRETSANTA_ADMIN_PASS: !Ref SecretSantaAdminPass
               SECRETSANTA_HAT_TABLE_NAME: !Ref SecretSantaHatTable
+              SECRETSANTA_ROOT_URL: !Ref SecretSantaRootUrl
     Api:
         Cors:
             AllowMethods: "'GET,POST'"
@@ -40,6 +41,9 @@ Parameters:
         Description: The user that can initialize secret santa hats
         Type: String
     SecretSantaAdminPass:
+        Description: The password of the user that can initialize secret santa hats
+        Type: String
+    SecretSantaRootUrl:
         Description: The password of the user that can initialize secret santa hats
         Type: String
 
