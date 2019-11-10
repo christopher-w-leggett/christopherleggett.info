@@ -8,9 +8,11 @@ Globals:
           Variables:
               ROOT_DOMAIN_NAME: !Ref RootDomainName
               ENABLE_SMS: !Ref EnableSMS
+              ENABLE_DYNAMO_DB: !Ref EnableDynamoDB
               HAT_SECRET: !Ref HatSecret
               SECRETSANTA_ADMIN_USER: !Ref SecretSantaAdminUser
               SECRETSANTA_ADMIN_PASS: !Ref SecretSantaAdminPass
+              SECRETSANTA_HAT_TABLE_NAME: !Ref SecretSantaHatTable
     Api:
         Cors:
             AllowMethods: "'GET,POST'"
@@ -25,6 +27,10 @@ Parameters:
         Type: String
     EnableSMS:
         Description: Whether SMS should be enabled or not (true|false)
+        Type: String
+        Default: false
+    EnableDynamoDB:
+        Description: Whether DynamoDB should be enabled or not (true|false)
         Type: String
         Default: false
     HatSecret:
@@ -211,6 +217,17 @@ Resources:
                             Action:
                                 - sns:Publish
                             Resource: "*"
+                          - Effect: Allow
+                            Action:
+                                - "dynamodb:BatchGetItem"
+                                - "dynamodb:GetItem"
+                                - "dynamodb:Query"
+                                - "dynamodb:Scan"
+                                - "dynamodb:BatchWriteItem"
+                                - "dynamodb:PutItem"
+                                - "dynamodb:UpdateItem"
+                                - "dynamodb:DeleteItem"
+                            Resource: "arn:aws:dynamodb:*:*:table/*"
 
     #Secret Santa Lambdas
     SecretSantaInitialize:
@@ -252,6 +269,17 @@ Resources:
                     Properties:
                         Path: /secretsanta/reveal
                         Method: post
+
+    #Secret Santa DB Table
+    SecretSantaHatTable:
+        Type: AWS::Serverless::SimpleTable
+        Properties:
+            PrimaryKey:
+                Name: hatId
+                Type: String
+            ProvisionedThroughput:
+                ReadCapacityUnits: 1
+                WriteCapacityUnits: 1
 
 Outputs:
     WebsiteURL:

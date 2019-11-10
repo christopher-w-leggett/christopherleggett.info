@@ -4,6 +4,7 @@ const sms = require('../../../../lib/sms');
 const Hat = require('../../../lib/Hat');
 const Participant = require('../../../lib/Participant');
 const Selection = require('../../../lib/Selection');
+const hatRepo = require('../../../lib/hatrepository');
 
 module.exports.handler = async (event, context) => {
     try {
@@ -23,6 +24,12 @@ module.exports.handler = async (event, context) => {
 
         //decrypt hat
         const hat = await Hat.decrypt(hatToken, hatSecret);
+
+        //verify hat is valid
+        const hatExists = await hatRepo.hasHat(hat);
+        if(!hatExists) {
+            throw new Error('Invalid hat provided or name has already been selected.');
+        }
 
         //pick a selection
         const selectedParticipant = hat.pick();
@@ -53,6 +60,7 @@ module.exports.handler = async (event, context) => {
         if(!allSelected) {
             //create next hat
             const nextHat = new Hat(participants);
+            await hatRepo.writeHat(nextHat);
 
             //encrypt payload
             const nextHatToken = await nextHat.encrypt(hatSecret);
@@ -61,8 +69,11 @@ module.exports.handler = async (event, context) => {
             const nextHatUrl = `https://${process.env.ROOT_DOMAIN_NAME}/index.html?hat=${nextHatToken}`;
 
             //send SMS
-            await sms.send(nextHatUrl, hat.getOwner().getMobileNumber());
+            await sms.send(nextHatUrl, nextHat.getOwner().getMobileNumber());
         }
+
+        //cleanup
+        await hatRepo.deleteHat(hat);
 
         return {
             'statusCode': 200,

@@ -3,6 +3,7 @@
 const sms = require('../../../../lib/sms');
 const Hat = require('../../../lib/Hat');
 const Participant = require('../../../lib/Participant');
+const hatRepo = require('../../../lib/hatrepository');
 
 function handleAuth(event, context) {
     //grab authorization header
@@ -53,6 +54,7 @@ module.exports.handler = async (event, context) => {
 
         //create hat
         const hat = new Hat(participants);
+        await hatRepo.writeHat(hat);
 
         //encrypt payload
         const hatToken = await hat.encrypt(hatSecret);
