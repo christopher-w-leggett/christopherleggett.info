@@ -8,7 +8,7 @@ const isDevelopment = process.env.NODE_ENV !== 'production';
 
 module.exports = async () => {
     const buildDir = await properties.read('frontend-build-dir', false);
-    const codeEntryFile = await properties.read('frontend-code-entry-file', false);
+    const codeEntryFiles = await properties.read('frontend-code-entry-files', false);
     const codeBuildDir = await properties.read('frontend-code-build-dir', false);
     const stylesBuildDir = await properties.read('frontend-styles-build-dir', false);
     const contentRootDir = await properties.read('frontend-content-root-dir', false);
@@ -19,19 +19,30 @@ module.exports = async () => {
         '**/*.handlebars',
         { cwd: contentRootDir }
     ).map((file) => {
+        const filepath = file.substring(0, file.length - '.handlebars'.length);
+        const possibleChunk = filepath.replace(/\//g, "-");
+        const chunk = codeEntryFiles.hasOwnProperty(possibleChunk) ? possibleChunk : 'main';
+
         return new HtmlWebpackPlugin({
-            filename: `${file.substring(0, file.length - '.handlebars'.length)}.html`,
+            filename: `${filepath}.html`,
             template: `${contentRootDir}/${file}`,
-            minify: !isDevelopment
+            minify: !isDevelopment,
+            chunks: [chunk]
         });
     });
 
+    //process entry files
+    const processedEntryFiles = Object.keys(codeEntryFiles).reduce((acc, key) => {
+        acc[key] = `./${codeEntryFiles[key]}`;
+        return acc;
+    }, {});
+
     //return webpack config
     return {
-        entry: './' + codeEntryFile,
+        entry: processedEntryFiles,
         output: {
             path: path.resolve(__dirname, buildDir),
-            filename: `${codeBuildDir}/[hash].js`
+            filename: `${codeBuildDir}/[name]-[hash].js`
         },
         devtool: isDevelopment && 'source-map',
         mode: isDevelopment ? 'development' : 'production',
@@ -92,7 +103,7 @@ module.exports = async () => {
         // },
         plugins: [
             new MiniCssExtractPlugin({
-                filename: `${stylesBuildDir}/[hash].css`
+                filename: `${stylesBuildDir}/[name]-[hash].css`
             }),
             ...contentPlugins
         ]

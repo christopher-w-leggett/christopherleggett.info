@@ -58,7 +58,7 @@ module.exports.handler = async (event, context) => {
 
         //encrypt payload
         const hatToken = await hat.encrypt(hatSecret);
-        const hatUrl = `${process.env.SECRETSANTA_ROOT_URL}/index.html?hat=${hatToken}`;
+        const hatUrl = `${process.env.SECRETSANTA_ROOT_URL}/secret-santa.html?hat=${hatToken}`;
         await sms.send(hatUrl, hat.getOwner().getMobileNumber());
 
         return {

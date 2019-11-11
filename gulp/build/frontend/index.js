@@ -45,11 +45,11 @@ module.exports = {
 
         gulp.task(taskNames.build, gulp.series(taskNames.config, async () => {
             const buildDir = await properties.read('frontend-build-dir', false);
-            const codeEntryFile = await properties.read('frontend-code-entry-file', false);
+            const codeEntryFiles = await properties.read('frontend-code-entry-files', false);
             const webpackConfig = await buildWebpackConfig();
 
             return new Promise(function(resolve, reject) {
-                gulp.src(codeEntryFile)
+                gulp.src(Object.values(codeEntryFiles))
                     .pipe(gulpWebpack(webpackConfig, webpack))
                     .on('error', reject)
                     .pipe(gulp.dest(`${buildDir}`))

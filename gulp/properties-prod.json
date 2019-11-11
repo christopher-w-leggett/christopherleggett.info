@@ -10,7 +10,10 @@
     "frontend-content-watch-files": ["content/**", "!**/.DS_Store"],
     "frontend-content-root-dir": "content/root",
     "frontend-code-files": ["code-frontend/src/main/**", "!**/.DS_Store"],
-    "frontend-code-entry-file": "code-frontend/src/main/App.jsx",
+    "frontend-code-entry-files": {
+        "main": "code-frontend/src/main/App.jsx",
+        "secret-santa": "code-frontend/src/main/secretsanta/App.jsx"
+    },
     "frontend-code-build-dir": "js",
     "frontend-styles-build-dir": "css",
     "frontend-config-src-file": "code-frontend/src/main/config/config-prod.json",
