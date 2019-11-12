@@ -5,6 +5,8 @@ const Hat = require('../../../lib/Hat');
 const Participant = require('../../../lib/Participant');
 const Selection = require('../../../lib/Selection');
 const hatRepo = require('../../../lib/hatrepository');
+const response = require('../../../lib/response');
+const ClientError = require('../../../lib/errors/ClientError.js');
 
 module.exports.handler = async (event, context) => {
     try {
@@ -16,19 +18,53 @@ module.exports.handler = async (event, context) => {
 
         //validate payload
         if(!hatToken) {
-            throw new Error('A hat must be provided to pick from.');
+            throw new ClientError('A hat must be provided to pick from.', null, 'ss-400-1', {
+                validation: [
+                    {
+                        type: 'field',
+                        path: 'hattoken'
+                    }
+                ]
+            });
         }
+        //TODO: regex to validate hat token
         if(!selectionPassword) {
-            throw new Error('A selection password is required to secure the selection.');
+            throw new ClientError('A selection password is required to secure the selection.', null, 'ss-400-1', {
+                validation: [
+                    {
+                        type: 'field',
+                        path: 'selectionpassword'
+                    }
+                ]
+            });
         }
 
         //decrypt hat
-        const hat = await Hat.decrypt(hatToken, hatSecret);
+        let hat;
+        try {
+            hat = await Hat.decrypt(hatToken, hatSecret);
+        } catch(error) {
+            throw new ClientError('Unable to decrypt provided hat.', error, 'ss-400-2', {
+                validation: [
+                    {
+                        type: 'field',
+                        path: 'hattoken'
+                    }
+                ]
+            });
+        }
 
         //verify hat is valid
         const hatExists = await hatRepo.hasHat(hat);
         if(!hatExists) {
-            throw new Error('Invalid hat provided or name has already been selected.');
+            throw new ClientError('Invalid hat provided or name has already been selected.', null, 'ss-400-2', {
+                validation: [
+                    {
+                        type: 'field',
+                        path: 'hattoken'
+                    }
+                ]
+            });
         }
 
         //pick a selection
@@ -75,18 +111,11 @@ module.exports.handler = async (event, context) => {
         //cleanup
         await hatRepo.deleteHat(hat);
 
-        return {
-            'statusCode': 200,
-            'headers': {
-                'Access-Control-Allow-Origin': `https://${process.env.ROOT_DOMAIN_NAME}`
-            },
-            'body': JSON.stringify({
-                name: selectedParticipant.getName()
-            })
-        };
-    } catch (err) {
-        //TODO: return error response.
-        console.error(err);
-        throw err;
+        return response.ok({
+            name: selectedParticipant.getName()
+        });
+    } catch (error) {
+        console.error(error);
+        return response.error(error);
     }
 };

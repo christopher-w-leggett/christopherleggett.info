@@ -4,6 +4,10 @@ const sms = require('../../../../lib/sms');
 const Hat = require('../../../lib/Hat');
 const Participant = require('../../../lib/Participant');
 const hatRepo = require('../../../lib/hatrepository');
+const payload = require('../../../lib/payload');
+const response = require('../../../lib/response');
+const AuthenticationError = require('../../../lib/errors/AuthenticationError.js');
+const ClientError = require('../../../lib/errors/ClientError.js');
 
 function handleAuth(event, context) {
     //grab authorization header
@@ -11,13 +15,13 @@ function handleAuth(event, context) {
 
     //unauthorized if no header
     if(!authorization) {
-        throw new Error('Unauthorized');
+        throw new AuthenticationError('No authentication credentials found.', null, 'ss-401-1');
     }
 
     //validate authorization type
     const authorizationParts = authorization.split(' ');
     if(authorizationParts.length !== 2 || authorizationParts[0] !== 'Basic') {
-        throw new Error('Unauthorized');
+        throw new AuthenticationError('Unsupported authentication credentials found.', null, 'ss-401-2');
     }
 
     //grab credentials
@@ -27,7 +31,7 @@ function handleAuth(event, context) {
 
     //validate credentials
     if(!(username === process.env.SECRETSANTA_ADMIN_USER && password === process.env.SECRETSANTA_ADMIN_PASS)) {
-        throw new Error('Unauthorized');
+        throw new AuthenticationError('Invalid authentication credentials provided.', null, 'ss-401-3');
     }
 }
 
@@ -38,13 +42,19 @@ module.exports.handler = async (event, context) => {
         handleAuth(event, context);
 
         //grab payload
-        const data = JSON.parse(event.body);
+        const data = payload.readJson(event);
         const hatSecret = process.env.HAT_SECRET;
 
         //validate payload
-        if(!data.participants || !data.participants.length) {
-            //TODO: Throw specific error
-            throw new Error('Invalid payload.  No participants provided.');
+        if(!data || !data.participants || !data.participants.length) {
+            throw new ClientError('No participants provided.', null, 'ss-400-1', {
+                validation: [
+                    {
+                        type: 'field',
+                        path: 'participants'
+                    }
+                ]
+            });
         }
 
         //create participants
@@ -61,16 +71,9 @@ module.exports.handler = async (event, context) => {
         const hatUrl = `${process.env.SECRETSANTA_ROOT_URL}/secret-santa.html?hat=${hatToken}`;
         await sms.send(hatUrl, hat.getOwner().getMobileNumber());
 
-        return {
-            'statusCode': 200,
-            'headers': {
-                'Access-Control-Allow-Origin': `https://${process.env.ROOT_DOMAIN_NAME}`
-            },
-            'body': JSON.stringify({})
-        };
-    } catch (err) {
-        //TODO: return error response.
-        console.error(err);
-        throw err;
+        return response.ok();
+    } catch (error) {
+        console.error(error);
+        return response.error(error);
     }
 };

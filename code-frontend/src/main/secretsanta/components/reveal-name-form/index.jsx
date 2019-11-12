@@ -11,7 +11,8 @@ module.exports = class RevealNameForm extends React.Component {
         super(props);
 
         this.state = {
-            name: ''
+            name: '',
+            error: ''
         };
     }
 
@@ -20,10 +21,13 @@ module.exports = class RevealNameForm extends React.Component {
         event.stopPropagation();
 
         const form = event.target;
+        const submitButton = form.querySelector('.btn-primary');
+        submitButton.disabled = true;
 
         if(form.checkValidity() === true) {
             this.setState({
-                name: ''
+                name: '',
+                error: ''
             });
             const response = await fetch(config.host + '/secretsanta/reveal', {
                 method: 'POST',
@@ -35,21 +39,54 @@ module.exports = class RevealNameForm extends React.Component {
                 },
                 body: JSON.stringify(formUtils.toJson(form))
             });
-            const json = await response.json();
-            this.setState({
-                name: json.name || ''
-            });
+            if(response.status === 200) {
+                const json = await response.json();
+                this.setState({
+                    name: json.name || ''
+                });
+            } else if(response.status === 400) {
+                const json = await response.json();
+                if(json.error && json.error.code === 'ss-400-2') {
+                    this.setState({
+                        error: 'Unable to reveal your selection.  Please verify the correct password has been entered.'
+                    });
+                } else {
+                    this.setState({
+                        error: 'Unknown error revealing your selection.'
+                    });
+                }
+            } else {
+                this.setState({
+                    error: 'Unknown error revealing your selection.'
+                });
+            }
         }
 
         form.classList.add('was-validated');
+        submitButton.disabled = false;
     }
 
     render() {
+        let errorResult = null;
+        if(this.state.error) {
+            errorResult = <div className="form-row">
+                <div className="col mb-3">
+                    <div className="alert alert-danger" role="alert">
+                        <p>{this.state.error}</p>
+                    </div>
+                </div>
+            </div>;
+        }
+
         let revealNameResult = null;
         if(this.state.name) {
-            revealNameResult = <div className="alert alert-success reveal-name-form-result" role="alert">
-                <p className="reveal-name-form-result__name-title">Selected Name.</p>
-                <p>{this.state.name}</p>
+            revealNameResult = <div className="form-row">
+                <div className="col mb-3">
+                    <div className="alert alert-success reveal-name-form-result" role="alert">
+                        <p className="reveal-name-form-result__name-title">Selected Name.</p>
+                        <p>{this.state.name}</p>
+                    </div>
+                </div>
             </div>;
         }
 
@@ -58,6 +95,11 @@ module.exports = class RevealNameForm extends React.Component {
                 <div className="form-row">
                     <div className="col mb-3">
                         <h2>Reveal your selection</h2>
+                    </div>
+                </div>
+                {errorResult}
+                <div className="form-row">
+                    <div className="col mb-3">
                         <div className="form-group">
                             <input type="hidden" name="selectiontoken" value={this.props.selectionToken}/>
                             <input type="password" className="form-control" aria-label="Selection Password" placeholder="Selection Password" name="selectionpassword" required minLength="8" maxLength="20"/>
@@ -69,11 +111,7 @@ module.exports = class RevealNameForm extends React.Component {
                         <button className="btn btn-primary" type="submit">Reveal Name</button>
                     </div>
                 </div>
-                <div className="form-row">
-                    <div className="col mb-3">
-                        {revealNameResult}
-                    </div>
-                </div>
+                {revealNameResult}
             </form>
         );
     }
