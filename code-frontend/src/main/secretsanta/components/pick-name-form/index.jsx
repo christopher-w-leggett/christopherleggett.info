@@ -29,33 +29,39 @@ module.exports = class PickNameForm extends React.Component {
                 name: '',
                 error: ''
             });
-            const response = await fetch(config.host + '/secretsanta/pick', {
-                method: 'POST',
-                mode: 'cors',
-                cache: 'no-cache',
-                credentials: 'omit',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(formUtils.toJson(form))
-            });
-            if(response.status === 200) {
-                const json = await response.json();
-                this.setState({
-                    name: json.name || ''
+            try {
+                const response = await fetch(config.host + '/secretsanta/pick', {
+                    method: 'POST',
+                    mode: 'cors',
+                    cache: 'no-cache',
+                    credentials: 'omit',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formUtils.toJson(form))
                 });
-            } else if(response.status === 400) {
-                const json = await response.json();
-                if(json.error && json.error.code === 'ss-400-2') {
+                if(response.status === 200) {
+                    const json = await response.json();
                     this.setState({
-                        error: 'Unable to pick a name.  You may only pick a name once.'
+                        name: json.name || ''
                     });
+                } else if(response.status === 400) {
+                    const json = await response.json();
+                    if(json.error && json.error.code === 'ss-400-2') {
+                        this.setState({
+                            error: 'Unable to pick a name.  You may only pick a name once.'
+                        });
+                    } else {
+                        this.setState({
+                            error: 'Unknown error picking a name.'
+                        });
+                    }
                 } else {
                     this.setState({
                         error: 'Unknown error picking a name.'
                     });
                 }
-            } else {
+            } catch(error) {
                 this.setState({
                     error: 'Unknown error picking a name.'
                 });

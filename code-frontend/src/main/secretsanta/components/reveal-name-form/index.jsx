@@ -29,33 +29,39 @@ module.exports = class RevealNameForm extends React.Component {
                 name: '',
                 error: ''
             });
-            const response = await fetch(config.host + '/secretsanta/reveal', {
-                method: 'POST',
-                mode: 'cors',
-                cache: 'no-cache',
-                credentials: 'omit',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(formUtils.toJson(form))
-            });
-            if(response.status === 200) {
-                const json = await response.json();
-                this.setState({
-                    name: json.name || ''
+            try {
+                const response = await fetch(config.host + '/secretsanta/reveal', {
+                    method: 'POST',
+                    mode: 'cors',
+                    cache: 'no-cache',
+                    credentials: 'omit',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formUtils.toJson(form))
                 });
-            } else if(response.status === 400) {
-                const json = await response.json();
-                if(json.error && json.error.code === 'ss-400-2') {
+                if(response.status === 200) {
+                    const json = await response.json();
                     this.setState({
-                        error: 'Unable to reveal your selection.  Please verify the correct password has been entered.'
+                        name: json.name || ''
                     });
+                } else if(response.status === 400) {
+                    const json = await response.json();
+                    if(json.error && json.error.code === 'ss-400-2') {
+                        this.setState({
+                            error: 'Unable to reveal your selection.  Please verify the correct password has been entered.'
+                        });
+                    } else {
+                        this.setState({
+                            error: 'Unknown error revealing your selection.'
+                        });
+                    }
                 } else {
                     this.setState({
                         error: 'Unknown error revealing your selection.'
                     });
                 }
-            } else {
+            } catch(error) {
                 this.setState({
                     error: 'Unknown error revealing your selection.'
                 });
