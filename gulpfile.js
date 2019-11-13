@@ -22,6 +22,7 @@ gulp.task('run', gulp.series(backend.taskNames.package, frontend.taskNames.build
     const frontendBuildDir = await properties.read('frontend-build-dir', false);
     const frontendContentFiles = await properties.read('frontend-content-watch-files', false);
     const frontendCodeFiles = await properties.read('frontend-code-files', false);
+    const frontendConfigDstFile = await properties.read('frontend-config-dst-file', false);
     const hatSecret = await properties.read('stack-hat-secret', true);
 
     //start sam
@@ -31,6 +32,6 @@ gulp.task('run', gulp.series(backend.taskNames.package, frontend.taskNames.build
     //watch backend files
     gulp.watch(backendFiles, {delay: 2000}, gulp.series(backend.taskNames.package));
 
-    //watch frontend files TODO: Don't watch config file which results in build loop.
-    gulp.watch([...frontendContentFiles, ...frontendCodeFiles], {delay: 2000}, gulp.series(frontend.taskNames.build));
+    //watch frontend files
+    gulp.watch([...frontendContentFiles, ...frontendCodeFiles, `!${frontendConfigDstFile}`], {delay: 2000}, gulp.series(frontend.taskNames.build));
 }));
