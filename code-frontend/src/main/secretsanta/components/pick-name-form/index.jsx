@@ -70,9 +70,9 @@ module.exports = class PickNameForm extends React.Component {
         let errorResult = null;
         if(this.state.error) {
             errorResult = <div className="form-row">
-                <div className="col mb-3">
+                <div className="col mb-0">
                     <div className="alert alert-danger" role="alert">
-                        <p>{this.state.error}</p>
+                        <p className="mb-0">{this.state.error}</p>
                     </div>
                 </div>
             </div>;
@@ -83,8 +83,8 @@ module.exports = class PickNameForm extends React.Component {
             pickNameResult = <div className="form-row">
                 <div className="col mb-3">
                     <div className="alert alert-success pick-name-form-result" role="alert">
-                        <p className="pick-name-form-result__selection-title">Selected Name.</p>
-                        <p>{this.state.name}</p>
+                        <p className="pick-name-form__result__selection-title">Selected Name</p>
+                        <p className="mb-0">{this.state.name}</p>
                     </div>
                 </div>
             </div>;
@@ -93,8 +93,8 @@ module.exports = class PickNameForm extends React.Component {
         return (
             <form className="needs-validation" noValidate onSubmit={this.onPickNameSubmit.bind(this)}>
                 <div className="form-row">
-                    <div className="col mb-3">
-                        <h2>Pick a name</h2>
+                    <div className="col mt-3">
+                        <h2 className="pick-name-form__header">Pick a name</h2>
                     </div>
                 </div>
                 {errorResult}
@@ -104,9 +104,8 @@ module.exports = class PickNameForm extends React.Component {
                             <input type="hidden" name="hattoken" value={this.props.hatToken}/>
                             <input type="password" className="form-control" aria-label="Create a Password" placeholder="Create a Password" name="selectionpassword" required minLength="8" maxLength="20"/>
                             <small className="form-text text-muted">
-                                Create a password to secure your selection.  Your password must be 8-20 characters long.
+                                Creating a password secures your selection so that only you can reveal the name.  Your password must be 8-20 characters long.
                             </small>
-                            <div className="invalid-feedback">Please create a password to secure your selection.</div>
                         </div>
                         <button className="btn btn-primary" type="submit">Pick a Name</button>
                     </div>

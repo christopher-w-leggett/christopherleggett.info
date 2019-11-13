@@ -70,9 +70,9 @@ module.exports = class RevealNameForm extends React.Component {
         let errorResult = null;
         if(this.state.error) {
             errorResult = <div className="form-row">
-                <div className="col mb-3">
+                <div className="col mb-0">
                     <div className="alert alert-danger" role="alert">
-                        <p>{this.state.error}</p>
+                        <p className="mb-0">{this.state.error}</p>
                     </div>
                 </div>
             </div>;
@@ -83,18 +83,18 @@ module.exports = class RevealNameForm extends React.Component {
             revealNameResult = <div className="form-row">
                 <div className="col mb-3">
                     <div className="alert alert-success reveal-name-form-result" role="alert">
-                        <p className="reveal-name-form-result__name-title">Selected Name.</p>
-                        <p>{this.state.name}</p>
+                        <p className="reveal-name-form__result__name-title">Selected Name</p>
+                        <p className="mb-0">{this.state.name}</p>
                     </div>
                 </div>
             </div>;
         }
 
         return (
-            <form className="needs-validation" noValidate onSubmit={this.onRevealNameSubmit.bind(this)}>
+            <form className="needs-validation reveal-name-form" noValidate onSubmit={this.onRevealNameSubmit.bind(this)}>
                 <div className="form-row">
-                    <div className="col mb-3">
-                        <h2>Reveal your selection</h2>
+                    <div className="col mt-3">
+                        <h2 className="reveal-name-form__header">Reveal your selection</h2>
                     </div>
                 </div>
                 {errorResult}
@@ -102,11 +102,10 @@ module.exports = class RevealNameForm extends React.Component {
                     <div className="col mb-3">
                         <div className="form-group">
                             <input type="hidden" name="selectiontoken" value={this.props.selectionToken}/>
-                            <input type="password" className="form-control" aria-label="Selection Password" placeholder="Selection Password" name="selectionpassword" required minLength="8" maxLength="20"/>
+                            <input type="password" className="form-control" aria-label="Your Password" placeholder="Your Password" name="selectionpassword" required minLength="8" maxLength="20"/>
                             <small className="form-text text-muted">
                                 Please enter the password you used to secure your selection.
                             </small>
-                            <div className="invalid-feedback">Password is required to reveal the name.</div>
                         </div>
                         <button className="btn btn-primary" type="submit">Reveal Name</button>
                     </div>

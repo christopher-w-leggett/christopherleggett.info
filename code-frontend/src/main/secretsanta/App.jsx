@@ -2,9 +2,11 @@
 
 const regeneratorRuntime = require("regenerator-runtime");
 const bootstrap = require('bootstrap');
+//TODO: Modify bootstrap css so app is more festive
 const boostrapCss = require('bootstrap/dist/css/bootstrap.min.css');
 const React = require('react');
 const ReactDOM = require('react-dom');
+const css = require('./App.scss');
 const Url = require('url-parse');
 
 //components
@@ -37,12 +39,18 @@ class App extends React.Component {
         }
 
         return (
-            <div className="container">
-                <div className="row">
-                    <div className="col">
-                        <h1>Secret Santa</h1>
-                        {pickNameForm}
-                        {revealNameForm}
+            <div>
+                <h1 className="secret-santa__header">Secret Santa</h1>
+                <div className="container">
+                    <div className="row">
+                        <div className="col-sm-3">
+                        </div>
+                        <div className="col-sm-6">
+                            {pickNameForm}
+                            {revealNameForm}
+                        </div>
+                        <div className="col-sm-3">
+                        </div>
                     </div>
                 </div>
             </div>

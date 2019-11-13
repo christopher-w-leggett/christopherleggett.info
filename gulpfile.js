@@ -31,6 +31,6 @@ gulp.task('run', gulp.series(backend.taskNames.package, frontend.taskNames.build
     //watch backend files
     gulp.watch(backendFiles, {delay: 2000}, gulp.series(backend.taskNames.package));
 
-    //watch frontend files
+    //watch frontend files TODO: Don't watch config file which results in build loop.
     gulp.watch([...frontendContentFiles, ...frontendCodeFiles], {delay: 2000}, gulp.series(frontend.taskNames.build));
 }));

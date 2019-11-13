@@ -1,8 +1,15 @@
-.reveal-name-form-result {
-    overflow: scroll;
+.reveal-name-form {
+    &__header {
+        font-size: 1.75rem;
+        font-weight: 300;
+    }
 
-    &__name-title {
-        font-weight: bold;
-        margin: 0;
+    &__result {
+        overflow: scroll;
+
+        &__name-title {
+            font-weight: bold;
+            margin: 0;
+        }
     }
 }

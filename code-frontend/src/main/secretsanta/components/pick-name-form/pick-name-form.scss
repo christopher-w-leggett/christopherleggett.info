@@ -1,13 +1,20 @@
-.pick-name-form-result {
-    overflow: scroll;
-
-    &__selection-title {
-        font-weight: bold;
-        margin: 0;
+.pick-name-form {
+    &__header {
+        font-size: 1.75rem;
+        font-weight: 300;
     }
 
-    &__new-hat-title {
-        font-weight: bold;
-        margin: 0;
+    &__result {
+        overflow: scroll;
+
+        &__selection-title {
+            font-weight: bold;
+            margin: 0;
+        }
+
+        &__new-hat-title {
+            font-weight: bold;
+            margin: 0;
+        }
     }
 }
