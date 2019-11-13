@@ -154,7 +154,7 @@ const PROPERTY_DEFINITIONS = {
     'stack-hat-secret': {
         'validation': {
             'required': true,
-            'regex': /^[a-zA-Z0-9\-]+$/
+            'regex': /^[a-zA-Z0-9\-\$\@]+$/
         },
         'prompt': {
             'type': 'input',

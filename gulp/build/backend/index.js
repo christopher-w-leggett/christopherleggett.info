@@ -44,15 +44,18 @@ module.exports = {
             const buildDir = await properties.read('backend-build-dir', false);
             const archiveName = await properties.read('backend-archive-name', true);
 
-            return gulp.src([
+            const zipStream = gulp.src([
                     `${buildDir}/${archiveName}/**`
                 ])
                 .pipe(zip(`${archiveName}.zip`))
                 .pipe(gulp.dest(buildDir));
+            return new Promise((resolve, reject) => {
+                zipStream.on('error', reject);
+                zipStream.on('finish', resolve);
+            });
         }));
 
-        //TODO: Fix gulp task dependencies.  This should rely on taskNames.package
-        gulp.task(taskNames.upload, gulp.series(async () => {
+        gulp.task(taskNames.upload, gulp.series(taskNames.package, async () => {
             //read properties
             const buildDir = await properties.read('backend-build-dir', false);
             const s3Bucket = await properties.read('backend-s3-bucket', true);
