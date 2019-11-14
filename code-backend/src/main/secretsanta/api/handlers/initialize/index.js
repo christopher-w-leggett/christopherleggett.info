@@ -69,7 +69,7 @@ module.exports.handler = async (event, context) => {
         //encrypt payload
         const hatToken = await hat.encrypt(hatSecret);
         const hatUrl = `${process.env.SECRETSANTA_ROOT_URL}/secret-santa.html?hat=${hatToken}`;
-        await sms.send(hatUrl, hat.getOwner().getMobileNumber());
+        await sms.send(`Secret Santa: Pick your name at ${hatUrl}`, hat.getOwner().getMobileNumber());
 
         return response.ok();
     } catch (error) {

@@ -74,7 +74,7 @@ module.exports.handler = async (event, context) => {
         //encrypt selection
         const selectionToken = await selection.encrypt(selectionPassword);
         const selectionUrl = `${process.env.SECRETSANTA_ROOT_URL}/secret-santa.html?selection=${selectionToken}`;
-        await sms.send(selectionUrl, hat.getOwner().getMobileNumber());
+        await sms.send(`Secret Santa: See your selection at ${selectionUrl}`, hat.getOwner().getMobileNumber());
 
         //generate a new list of participants for our next hat.
         let allSelected = true;
@@ -105,7 +105,7 @@ module.exports.handler = async (event, context) => {
             const nextHatUrl = `${process.env.SECRETSANTA_ROOT_URL}/secret-santa.html?hat=${nextHatToken}`;
 
             //send SMS
-            await sms.send(nextHatUrl, nextHat.getOwner().getMobileNumber());
+            await sms.send(`Secret Santa: Pick your name at ${nextHatUrl}`, nextHat.getOwner().getMobileNumber());
         }
 
         //cleanup
