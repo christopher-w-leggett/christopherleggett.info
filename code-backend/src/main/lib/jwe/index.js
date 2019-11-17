@@ -1,12 +1,24 @@
 "use strict";
 
+const crypto = require('crypto');
 const jose = require('node-jose');
 
 async function createKey(secret) {
+    const key = await new Promise((resolve, reject) => {
+        crypto.scrypt(Buffer.from(secret), Buffer.from(''), 32, (error, derivedKey) => {
+            if(error) {
+                reject(error);
+            } else {
+                resolve(derivedKey);
+            }
+        });
+    });
+
     return await new Promise((resolve, reject) => {
         jose.JWK.asKey({
             'kty': 'oct',
-            'k': secret
+            'alg': 'A256GCM',
+            'k': key
         }).then((result) => {
             resolve(result);
         }).catch((error) => {
@@ -20,7 +32,7 @@ module.exports = {
         const key = await createKey(secret);
 
         return new Promise((resolve, reject) => {
-            jose.JWE.createEncrypt({format: 'compact'}, key).update(JSON.stringify(payload)).final().then((result) => {
+            jose.JWE.createEncrypt({format: 'compact'}, key).update(Buffer.from(JSON.stringify(payload))).final().then((result) => {
                     resolve(result);
                 }).catch((error) => {
                     reject(error);
