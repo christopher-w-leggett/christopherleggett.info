@@ -1,16 +1,18 @@
 'use strict';
 
 const React = require('react');
+const { Form, Col, Alert, Button } = require('react-bootstrap');
 const css = require('./reveal-name-form.scss');
 const config = require('../../../config/config.json');
 const formUtils = require('../../lib/form-utils');
 
-//TODO: change to use react-bootstrap
 module.exports = class RevealNameForm extends React.Component {
     constructor(props) {
         super(props);
 
         this.state = {
+            validated: false,
+            submitting: false,
             name: '',
             error: ''
         };
@@ -19,16 +21,16 @@ module.exports = class RevealNameForm extends React.Component {
     async onRevealNameSubmit(event) {
         event.preventDefault();
         event.stopPropagation();
-
         const form = event.target;
-        const submitButton = form.querySelector('.btn-primary');
-        submitButton.disabled = true;
+        let name = '';
+        let error = '';
 
+        this.setState({
+            submitting: true,
+            name: name,
+            error: error
+        });
         if(form.checkValidity() === true) {
-            this.setState({
-                name: '',
-                error: ''
-            });
             try {
                 const response = await fetch(config.host + '/secretsanta/reveal', {
                     method: 'POST',
@@ -42,82 +44,78 @@ module.exports = class RevealNameForm extends React.Component {
                 });
                 if(response.status === 200) {
                     const json = await response.json();
-                    this.setState({
-                        name: json.name || ''
-                    });
+                    name = json.name || '';
                 } else if(response.status === 400) {
                     const json = await response.json();
                     if(json.error && json.error.code === 'ss-400-2') {
-                        this.setState({
-                            error: 'Unable to reveal your selection.  Please verify the correct password has been entered.'
-                        });
+                        error = 'Unable to reveal your selection.  Please verify the correct password has been entered.';
                     } else {
-                        this.setState({
-                            error: 'Unknown error revealing your selection.'
-                        });
+                        error = 'Unknown error revealing your selection.';
                     }
                 } else {
-                    this.setState({
-                        error: 'Unknown error revealing your selection.'
-                    });
+                    error = 'Unknown error revealing your selection.';
                 }
             } catch(error) {
-                this.setState({
-                    error: 'Unknown error revealing your selection.'
-                });
+                error = 'Unknown error revealing your selection.';
             }
         }
 
-        form.classList.add('was-validated');
-        submitButton.disabled = false;
+        this.setState({
+            validated: true,
+            submitting: false,
+            name: name,
+            error: error
+        });
     }
 
     render() {
         let errorResult = null;
         if(this.state.error) {
-            errorResult = <div className="form-row">
-                <div className="col mb-0">
-                    <div className="alert alert-danger" role="alert">
+            errorResult = <Form.Row>
+                <Form.Group as={Col} className="mb-0">
+                    <Alert variant="danger">
                         <p className="mb-0">{this.state.error}</p>
-                    </div>
-                </div>
-            </div>;
+                    </Alert>
+                </Form.Group>
+            </Form.Row>;
         }
 
         let revealNameResult = null;
         if(this.state.name) {
-            revealNameResult = <div className="form-row">
-                <div className="col mb-3">
-                    <div className="alert alert-success reveal-name-form-result" role="alert">
+            revealNameResult = <Form.Row>
+                <Form.Group as={Col}>
+                    <Alert variant="success" className="reveal-name-form-result">
                         <p className="reveal-name-form__result__name-title">Selected Name</p>
                         <p className="mb-0">{this.state.name}</p>
-                    </div>
-                </div>
-            </div>;
+                    </Alert>
+                </Form.Group>
+            </Form.Row>;
         }
 
         return (
-            <form className="needs-validation reveal-name-form" noValidate onSubmit={this.onRevealNameSubmit.bind(this)}>
-                <div className="form-row">
-                    <div className="col mt-3">
+            <Form noValidate validated={this.state.validated} onSubmit={this.onRevealNameSubmit.bind(this)}>
+                <Form.Row>
+                    <Form.Group as={Col} className="mt-3 mb-0">
                         <h2 className="reveal-name-form__header">Reveal your selection</h2>
-                    </div>
-                </div>
+                    </Form.Group>
+                </Form.Row>
                 {errorResult}
-                <div className="form-row">
-                    <div className="col mb-3">
-                        <div className="form-group">
-                            <input type="hidden" name="selectiontoken" value={this.props.selectionToken}/>
-                            <input type="password" className="form-control" aria-label="Your Password" placeholder="Your Password" name="selectionpassword" required minLength="8" maxLength="20"/>
-                            <small className="form-text text-muted">
-                                Please enter the password you used to secure your selection.
-                            </small>
-                        </div>
-                        <button className="btn btn-primary" type="submit">Reveal Name</button>
-                    </div>
-                </div>
+                <Form.Row>
+                    <Form.Group as={Col}>
+                        <Form.Control type="hidden" name="selectiontoken" value={this.props.selectionToken}/>
+                        <Form.Control type="password" aria-label="Your Password" placeholder="Your Password" name="selectionpassword" required minLength="8" maxLength="20"/>
+                        <Form.Text className="text-muted">
+                            Please enter the password you used to secure your selection.
+                        </Form.Text>
+                    </Form.Group>
+                </Form.Row>
+                <Form.Row>
+                    <Form.Group as={Col}>
+                        <Button variant="primary" type="submit" disabled={this.state.submitting}>Reveal Name</Button>
+                    </Form.Group>
+                </Form.Row>
                 {revealNameResult}
-            </form>
+            </Form>
         );
     }
 }

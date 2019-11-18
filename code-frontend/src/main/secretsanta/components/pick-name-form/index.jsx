@@ -1,16 +1,18 @@
 'use strict';
 
 const React = require('react');
+const { Form, Col, Alert, Button } = require('react-bootstrap');
 const css = require('./pick-name-form.scss');
 const config = require('../../../config/config.json');
 const formUtils = require('../../lib/form-utils');
 
-//TODO: change to use react-bootstrap
 module.exports = class PickNameForm extends React.Component {
     constructor(props) {
         super(props);
 
         this.state = {
+            validated: false,
+            submitting: false,
             name: '',
             error: ''
         };
@@ -19,16 +21,16 @@ module.exports = class PickNameForm extends React.Component {
     async onPickNameSubmit(event) {
         event.preventDefault();
         event.stopPropagation();
-
         const form = event.target;
-        const submitButton = form.querySelector('.btn-primary');
-        submitButton.disabled = true;
+        let name = '';
+        let error = '';
 
+        this.setState({
+            submitting: true,
+            name: name,
+            error: error
+        });
         if(form.checkValidity() === true) {
-            this.setState({
-                name: '',
-                error: ''
-            });
             try {
                 const response = await fetch(config.host + '/secretsanta/pick', {
                     method: 'POST',
@@ -42,82 +44,78 @@ module.exports = class PickNameForm extends React.Component {
                 });
                 if(response.status === 200) {
                     const json = await response.json();
-                    this.setState({
-                        name: json.name || ''
-                    });
+                    name = json.name || '';
                 } else if(response.status === 400) {
                     const json = await response.json();
                     if(json.error && json.error.code === 'ss-400-2') {
-                        this.setState({
-                            error: 'Unable to pick a name.  You may only pick a name once.'
-                        });
+                        error = 'Unable to pick a name.  You may only pick a name once.';
                     } else {
-                        this.setState({
-                            error: 'Unknown error picking a name.'
-                        });
+                        error = 'Unknown error picking a name.';
                     }
                 } else {
-                    this.setState({
-                        error: 'Unknown error picking a name.'
-                    });
+                    error = 'Unknown error picking a name.';
                 }
             } catch(error) {
-                this.setState({
-                    error: 'Unknown error picking a name.'
-                });
+                error = 'Unknown error picking a name.';
             }
         }
 
-        form.classList.add('was-validated');
-        submitButton.disabled = false;
+        this.setState({
+            validated: true,
+            submitting: false,
+            name: name,
+            error: error
+        });
     }
 
     render() {
         let errorResult = null;
         if(this.state.error) {
-            errorResult = <div className="form-row">
-                <div className="col mb-0">
-                    <div className="alert alert-danger" role="alert">
+            errorResult = <Form.Row>
+                <Form.Group as={Col} className="mb-0">
+                    <Alert variant="danger">
                         <p className="mb-0">{this.state.error}</p>
-                    </div>
-                </div>
-            </div>;
+                    </Alert>
+                </Form.Group>
+            </Form.Row>;
         }
 
         let pickNameResult = null;
         if(this.state.name) {
-            pickNameResult = <div className="form-row">
-                <div className="col mb-3">
-                    <div className="alert alert-success pick-name-form-result" role="alert">
+            pickNameResult = <Form.Row>
+                <Form.Group as={Col}>
+                    <Alert variant="success" className="pick-name-form-result">
                         <p className="pick-name-form__result__selection-title">Selected Name</p>
                         <p className="mb-0">{this.state.name}</p>
-                    </div>
-                </div>
-            </div>;
+                    </Alert>
+                </Form.Group>
+            </Form.Row>;
         }
 
         return (
-            <form className="needs-validation" noValidate onSubmit={this.onPickNameSubmit.bind(this)}>
-                <div className="form-row">
-                    <div className="col mt-3">
+            <Form noValidate validated={this.state.validated} onSubmit={this.onPickNameSubmit.bind(this)}>
+                <Form.Row>
+                    <Form.Group as={Col} className="mt-3 mb-0">
                         <h2 className="pick-name-form__header">Pick a name</h2>
-                    </div>
-                </div>
+                    </Form.Group>
+                </Form.Row>
                 {errorResult}
-                <div className="form-row">
-                    <div className="col mb-3">
-                        <div className="form-group">
-                            <input type="hidden" name="hattoken" value={this.props.hatToken}/>
-                            <input type="password" className="form-control" aria-label="Create a Password" placeholder="Create a Password" name="selectionpassword" required minLength="8" maxLength="20"/>
-                            <small className="form-text text-muted">
-                                Creating a password secures your selection so that only you can reveal the name.  Your password must be 8-20 characters long.
-                            </small>
-                        </div>
-                        <button className="btn btn-primary" type="submit">Pick a Name</button>
-                    </div>
-                </div>
+                <Form.Row>
+                    <Form.Group as={Col}>
+                        <Form.Control type="hidden" name="hattoken" value={this.props.hatToken}/>
+                        <Form.Control type="password" aria-label="Create a Password" placeholder="Create a Password" name="selectionpassword" required minLength="8" maxLength="20"/>
+                        <Form.Text className="text-muted">
+                            Creating a password secures your selection so that only you can reveal the name.  Your password must be 8-20 characters long.
+                        </Form.Text>
+                    </Form.Group>
+                </Form.Row>
+                <Form.Row>
+                    <Form.Group as={Col}>
+                        <Button variant="primary" type="submit" disabled={this.state.submitting}>Pick a Name</Button>
+                    </Form.Group>
+                </Form.Row>
                 {pickNameResult}
-            </form>
+            </Form>
         );
     }
 }

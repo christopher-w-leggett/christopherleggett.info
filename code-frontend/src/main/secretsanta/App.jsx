@@ -1,13 +1,21 @@
 'use strict';
 
+//react
+const React = require('react');
+const ReactDOM = require('react-dom');
+
+//bootstrap
 const regeneratorRuntime = require("regenerator-runtime");
 const bootstrap = require('bootstrap');
 //TODO: Modify bootstrap css so app is more festive
 const boostrapCss = require('bootstrap/dist/css/bootstrap.min.css');
-const React = require('react');
-const ReactDOM = require('react-dom');
-const css = require('./App.scss');
+const { Container, Row, Col } = require('react-bootstrap');
+
+//libs
 const Url = require('url-parse');
+
+//app specific
+const css = require('./App.scss');
 
 //components
 const PickNameForm = require('./components/pick-name-form/index.jsx');
@@ -41,18 +49,18 @@ class App extends React.Component {
         return (
             <div>
                 <h1 className="secret-santa__header">Secret Santa</h1>
-                <div className="container">
-                    <div className="row">
-                        <div className="col-sm-3">
-                        </div>
-                        <div className="col-sm-6">
+                <Container>
+                    <Row>
+                        <Col sm={3}>
+                        </Col>
+                        <Col sm={6}>
                             {pickNameForm}
                             {revealNameForm}
-                        </div>
-                        <div className="col-sm-3">
-                        </div>
-                    </div>
-                </div>
+                        </Col>
+                        <Col sm={3}>
+                        </Col>
+                    </Row>
+                </Container>
             </div>
         );
     }
