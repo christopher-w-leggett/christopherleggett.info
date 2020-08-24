@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: Christopher Leggett Info Website
+Description: Christopher Leggett Website
 
 Globals:
     Function:
@@ -64,7 +64,7 @@ Resources:
                     DNSName: !GetAtt CDN.DomainName
             -
                 Name: !Sub
-                    - www.${Domain}
+                    - christopher.${Domain}
                     - Domain: !Ref RootDomainName
                 Type: CNAME
                 TTL: 990
@@ -88,7 +88,7 @@ Resources:
                 Aliases:
                     - !Ref RootDomainName
                     - !Sub
-                        - www.${Domain}
+                        - christopher.${Domain}
                         - Domain: !Ref RootDomainName
                 CustomErrorResponses:
                     - ErrorCode: 403
@@ -122,9 +122,6 @@ Resources:
                         Cookies:
                             Forward: none
                     ViewerProtocolPolicy: redirect-to-https
-                    LambdaFunctionAssociations:
-                        - EventType: viewer-request
-                          LambdaFunctionARN: !Ref RedirectLambdaVersion10
                 PriceClass: PriceClass_100
                 Restrictions:
                     GeoRestriction:
@@ -140,34 +137,6 @@ Resources:
         Properties:
             CloudFrontOriginAccessIdentityConfig:
                 Comment: Access to frontend bucket
-    RedirectLambda:
-        Type: AWS::Lambda::Function
-        Properties:
-            Description: >
-                Edge Lambda performing domain redirects.
-            Code: temp/build/code-backend/christopherleggett.info.zip
-            Handler: edge/redirects/index.handler
-            MemorySize: 128
-            Role: !GetAtt RedirectLambdaExecutionRole.Arn
-            Runtime: nodejs10.x
-    RedirectLambdaVersion10:
-        Type: AWS::Lambda::Version
-        Properties:
-            FunctionName: !Ref RedirectLambda
-            Description: !Sub "Redirect handling for www.${RootDomainName}"
-    RedirectLambdaExecutionRole:
-        Type: AWS::IAM::Role
-        Properties:
-            AssumeRolePolicyDocument:
-                Version: 2012-10-17
-                Statement:
-                    - Effect: Allow
-                      Principal:
-                          Service:
-                              - edgelambda.amazonaws.com
-                              - lambda.amazonaws.com
-                      Action:
-                          - sts:AssumeRole
     FrontendRootBucket:
         Type: AWS::S3::Bucket
         Properties:
@@ -237,9 +206,9 @@ Resources:
     SecretSantaInitialize:
         Type: AWS::Serverless::Function
         Properties:
-            CodeUri: temp/build/code-backend/christopherleggett.info.zip
+            CodeUri: temp/build/code-backend/christopher.leggett.link.zip
             Handler: secretsanta/api/handlers/initialize/index.handler
-            Runtime: nodejs10.x
+            Runtime: nodejs12.x
             Role: !GetAtt SecretSantaLambdaExecutionRole.Arn
             Events:
                 HelloWorldGET:
@@ -250,9 +219,9 @@ Resources:
     SecretSantaPick:
         Type: AWS::Serverless::Function
         Properties:
-            CodeUri: temp/build/code-backend/christopherleggett.info.zip
+            CodeUri: temp/build/code-backend/christopher.leggett.link.zip
             Handler: secretsanta/api/handlers/pick/index.handler
-            Runtime: nodejs10.x
+            Runtime: nodejs12.x
             Role: !GetAtt SecretSantaLambdaExecutionRole.Arn
             Events:
                 HelloWorldGET:
@@ -263,9 +232,9 @@ Resources:
     SecretSantaReveal:
         Type: AWS::Serverless::Function
         Properties:
-            CodeUri: temp/build/code-backend/christopherleggett.info.zip
+            CodeUri: temp/build/code-backend/christopher.leggett.link.zip
             Handler: secretsanta/api/handlers/reveal/index.handler
-            Runtime: nodejs10.x
+            Runtime: nodejs12.x
             Role: !GetAtt SecretSantaLambdaExecutionRole.Arn
             Events:
                 HelloWorldGET:

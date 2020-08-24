@@ -1,11 +1,11 @@
 {
-    "backend-s3-bucket": "christopherleggett.info-backend",
-    "backend-archive-name": "christopherleggett.info",
+    "backend-s3-bucket": "christopher.leggett.link-backend",
+    "backend-archive-name": "christopher.leggett.link",
     "backend-files": [
         "package.json", "package-lock.json", "code-backend/src/main/**"
     ],
     "backend-build-dir": "temp/build/code-backend",
-    "frontend-s3-bucket": "christopherleggett.info",
+    "frontend-s3-bucket": "leggett.link",
     "frontend-build-dir": "temp/build/code-frontend/root",
     "frontend-content-watch-files": ["content/**", "!**/.DS_Store"],
     "frontend-content-root-dir": "content/root",
@@ -20,6 +20,6 @@
     "frontend-config-dst-file": "code-frontend/src/main/config/config.json",
     "frontend-module-dirs": ["code-frontend/src/main"],
     "profile": "admin",
-    "stack-name": "christopherleggett-info-stack",
+    "stack-name": "christopher-leggett-link-stack",
     "stack-root-domain-name": "localhost:3000"
 }
